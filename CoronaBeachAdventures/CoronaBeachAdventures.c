@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <allegro5/allegro.h>
+#include "audio.h"
 
 #define FPS 60.f
 
@@ -29,6 +30,12 @@ int main()
 		return 1;
 	}
 
+	//addon que da suporte as extensoes de audio
+	if (!al_init_acodec_addon()) {
+		error_msg("Falha ao inicializar o codec de audio");
+		return 0;
+	}
+
 	// Cria um timer
 	timer = al_create_timer(1.0 / FPS);
 	if (!timer) {
@@ -50,6 +57,12 @@ int main()
 	if (!fila_eventos) {
 		fprintf(stderr, "Falha ao criar a fila de eventos.");
 		return 1;
+	}
+
+	//addon de audio
+	if (!al_install_audio()) {
+		error_msg("Falha ao inicializar o audio");
+		return 0;
 	}
 
 	if (!al_install_keyboard()) {
@@ -75,6 +88,17 @@ int main()
 
 	// Inicia o timer
 	al_start_timer(timer);
+
+	//cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
+	if (!al_reserve_samples(5)) {
+		error_msg("Falha ao reservar amostrar de audio");
+		return 0;
+	}
+
+	//liga o stream no mixer
+	Audio musica = carregar_audio("soundtrack.ogg");
+	//define que o stream vai tocar no modo repeat
+	al_set_audio_stream_playmode(musica.som, ALLEGRO_PLAYMODE_LOOP);
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -111,8 +135,8 @@ int main()
 	}
 
 	// Limpa tudo
-	al_destroy_display(janela);
+	al_destroy_audio_stream(musica.som);
 	al_destroy_event_queue(fila_eventos);
-
+	al_destroy_display(janela);
 	return 0;
 }
