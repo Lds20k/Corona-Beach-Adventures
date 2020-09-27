@@ -1,12 +1,24 @@
-// CoronaBeachAdventures.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/* -- Corona Beach Adventures -- 
+* Projeto desenvolvido no Senac Santo Amaro para o
+* Projeto Integrado(PI) de Jogos Digitais do curso
+* de Ciência da Computação.
+* 
+*  -- Feito por --
+* Daniel Bortoleti Melo
+* Lucas da Silva dos Santos
+* Rafael Nascimento Rodrigues
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <allegro5/allegro.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_native_dialog.h>
+#include <allegro5/allegro_acodec.h>
 
 #include "sprites.h"
 #include "audio.h"
+#include "mapa.h"
 
 #define FPS 60.f
 
@@ -17,8 +29,7 @@
 
 #define COR_PRETA al_map_rgb(0, 0, 0)
 
-int main()
-{
+int main() {
 	ALLEGRO_DISPLAY *janela = NULL;
 	ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 	ALLEGRO_TIMER *timer = NULL;
@@ -28,27 +39,33 @@ int main()
 
 	// Inicia o allegro
 	if (!al_init()) {
-		fprintf(stderr, "Falha ao iniciar.\n");
+		printf("Falha ao iniciar.\n");
 		return 1;
 	}
 
-	//addon que da suporte as extensoes de audio
+	// Inicia addon que da suporte as extensoes de imagem
+	if (!al_init_image_addon()) {
+		printf("Falha ao inicia addon de imagem.\n");
+		return 1;
+	}
+
+	// Inicia addon que da suporte as extensoes de audio
 	if (!al_init_acodec_addon()) {
-		error_msg("Falha ao inicializar o codec de audio");
+		printf("Falha ao inicializar o codec de audio.\n");
 		return 0;
 	}
 
 	// Cria um timer
 	timer = al_create_timer(1.0 / FPS);
 	if (!timer) {
-		fprintf(stderr, "Failed to create timer.\n");
+		printf("Falha ao criar timer.\n");
 		return 1;
 	}
 
 	// Cria uma janela de 640px por 480px
 	janela = al_create_display(JANELA_LARGURA, JANELA_ALTURA);
 	if (!janela) {
-		fprintf(stderr, "Falha ao criar uma janela.\n");
+		printf("Falha ao criar uma janela.\n");
 		return 1;
 	}
 	al_set_window_title(janela, NOME_JOGO);
@@ -57,29 +74,25 @@ int main()
 	// Cria a fila de eventos
 	fila_eventos = al_create_event_queue();
 	if (!fila_eventos) {
-		fprintf(stderr, "Falha ao criar a fila de eventos.");
+		printf("Falha ao criar a fila de eventos.\n");
 		return 1;
 	}
 
-	//addon de audio
+	// Instala audio
 	if (!al_install_audio()) {
-		error_msg("Falha ao inicializar o audio");
+		printf("Falha ao instalar o audio.\n");
 		return 0;
 	}
 
+	// Instala teclado
 	if (!al_install_keyboard()) {
-		fprintf(stderr, "Falha ao instalar o teclado.");
+		printf("Falha ao instalar o teclado.\n");
 		return 1;
 	}
 
-	if (!al_init_image_addon()) {
-		printf("Falha ao inicia addon de imagem");
-		return 1; 
-
-	}
-
+	// Instala mouse
 	if (!al_install_mouse()) {
-		fprintf(stderr, "Falha ao instalar o mouse.");
+		printf("Falha ao instalar o mouse.\n");
 		return 1;
 	}
 
@@ -97,25 +110,31 @@ int main()
 	// Inicia o timer
 	al_start_timer(timer);
 
-	// Carregar sprite
+	// Carregar um sprite
 	Sprite imagem = carregar_sprite("ui.bmp");
 
-	//cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
+	// Cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
 	if (!al_reserve_samples(5)) {
-		error_msg("Falha ao reservar amostrar de audio");
+		printf("Falha ao reservar amostrar de audio");
 		return 0;
 	}
 
-	//liga o stream no mixer
+	// Carrega uma audio
 	Audio musica = carregar_audio("soundtrack.ogg");
-	//define que o stream vai tocar no modo repeat
+
+	// Define que o stream vai tocar no modo repeat
 	al_set_audio_stream_playmode(musica.som, ALLEGRO_PLAYMODE_LOOP);
+
+	// Carrega mapa
+	Mapa* mapa = carregar_mapa("praia.bmp");
 
 	// Loop principal do jogo
 	while (rodando) {
 		ALLEGRO_EVENT evento;
 		ALLEGRO_TIMEOUT timeout;
-		
+
+		// Conecta o audio no mixer
+		al_attach_audio_stream_to_mixer(musica.som, al_get_default_mixer());
 
 		// Inicializa o timer
 		al_init_timeout(&timeout, 0.06);
@@ -141,13 +160,16 @@ int main()
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
+
 			al_draw_bitmap(imagem.imagem, 0, 0, 0);
+
 			al_flip_display();
 			desenhar = false;
 		}
 	}
 
 	// Limpa tudo
+	descarregar_mapa(mapa);
 	al_destroy_audio_stream(musica.som);
 	al_destroy_event_queue(fila_eventos);
 	al_destroy_display(janela);
