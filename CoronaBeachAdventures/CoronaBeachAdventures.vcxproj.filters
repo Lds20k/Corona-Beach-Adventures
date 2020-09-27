@@ -18,7 +18,11 @@
     <ClCompile Include="CoronaBeachAdventures.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="sprites.h">
+=======
+    <ClCompile Include="audio.h">
+>>>>>>> 4372b22b79d24c4ae6c13b6f14b6d154796f4881
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

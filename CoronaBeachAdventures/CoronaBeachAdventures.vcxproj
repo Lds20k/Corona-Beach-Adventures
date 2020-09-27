@@ -172,6 +172,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="audio.h" />
     <ClCompile Include="CoronaBeachAdventures.c" />
     <ClCompile Include="sprites.h" />
   </ItemGroup>
