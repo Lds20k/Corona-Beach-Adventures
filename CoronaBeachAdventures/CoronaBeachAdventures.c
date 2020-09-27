@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <allegro5/allegro.h>
+#include "sprites.h"
 
 #define FPS 60.f
 
@@ -57,6 +58,12 @@ int main()
 		return 1;
 	}
 
+	if (!al_init_image_addon()) {
+		printf("Falha ao inicia addon de imagem");
+		return 1; 
+
+	}
+
 	if (!al_install_mouse()) {
 		fprintf(stderr, "Falha ao instalar o mouse.");
 		return 1;
@@ -76,10 +83,14 @@ int main()
 	// Inicia o timer
 	al_start_timer(timer);
 
+	// Carregar sprite
+	Sprite imagem = carregar_sprite("ui.bmp");
+
 	// Loop principal do jogo
 	while (rodando) {
 		ALLEGRO_EVENT evento;
 		ALLEGRO_TIMEOUT timeout;
+		
 
 		// Inicializa o timer
 		al_init_timeout(&timeout, 0.06);
@@ -105,6 +116,7 @@ int main()
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
+			al_draw_bitmap(imagem.imagem, 0, 0, 0);
 			al_flip_display();
 			desenhar = false;
 		}
