@@ -111,7 +111,8 @@ int main() {
 	al_start_timer(timer);
 
 	// Carregar um sprite
-	Sprite imagem = carregar_sprite("ui.bmp");
+	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
+	Sprite botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 
 	// Cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
 	if (!al_reserve_samples(5)) {
@@ -161,8 +162,8 @@ int main() {
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
 
-			al_draw_bitmap(imagem.imagem, 0, 0, 0);
-
+			al_draw_bitmap(botoes.imagem, 0, 0, 0);
+			desenhar_mapa(mapa);
 			al_flip_display();
 			desenhar = false;
 		}
