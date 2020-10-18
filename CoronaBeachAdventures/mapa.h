@@ -6,6 +6,7 @@
 #include <allegro5/allegro.h>
 
 #include "sprites.h"
+#include "personagem.h"
 
 #define TAMANHO_DO_TILE 16
 
@@ -15,27 +16,31 @@ Sprite terra;
 Sprite terra_direita;
 Sprite terra_esquerda;
 
-typedef struct Tile {
+typedef struct Tiles {
 	unsigned x;
 	unsigned y;
+	unsigned largura;
+	unsigned altura;
 	Sprite* sprite;
 	struct Tile* next;
 } Tile;
 
-typedef struct Mapa {
+typedef struct Mapas {
 	Tile* tiles;
 	unsigned largura;
 	unsigned altura;
 } Mapa;
 
 // Cria um tile
-Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y) {
+Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura) {
 	Tile* tile = (Tile*)malloc(sizeof(Tile));
 	if (tile == NULL) {
 		return NULL;
 	}
 	tile->x = x;
 	tile->y = y;
+	tile->largura = largura;
+	tile->altura = altura;
 	tile->sprite = sprite;
 	tile->next = NULL;
 	return tile;
@@ -43,15 +48,15 @@ Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y) {
 
 // Cria uma lista de Tiles caso o parametro tile seja nulo
 // Caso não nulo, adiciona na lista
-void adicionar_tile(Tile** tile, Sprite* sprite, unsigned x, unsigned y) {
+void adicionar_tile(Tile** tile, Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura) {
 	if (*tile == NULL) {
-		*tile = criar_tile(sprite, x, y);
+		*tile = criar_tile(sprite, x, y, largura, altura);
 	} else {
 		Tile* aux = *tile;
 		while (aux->next != NULL) {
 			aux = aux->next;
 		}
-		aux->next = criar_tile(sprite, x, y);
+		aux->next = criar_tile(sprite, x, y, largura, altura);
 	}
 }
 
@@ -98,7 +103,7 @@ bool definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, con
 				sprite = &terra_esquerda;
 	}
 
-	adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE);
+	adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE);
 	printf("%d %d\t| %f %f %f\n", x, y, cor.r, cor.g, cor.b);
 }
 
@@ -139,6 +144,22 @@ void desenhar_mapa(Mapa* mapa) {
 		al_draw_bitmap_region(sprite->imagem, sprite->x, sprite->y, sprite->largura, sprite->altura, tile->x, tile->y, sprite->sinalizadores);
 		tile = tile->next;
 	}
+}
+
+bool verificar_colisao(Mapa* mapa, Personagem* personagem) {
+	Tile* tile = mapa->tiles;
+
+	while (tile != NULL) {
+
+		if (personagem->y + personagem->altura < tile->y) return false;
+		if (personagem->y > tile->y + tile->altura) return false;
+
+		if (personagem->largura + personagem->x < tile->x) return false;
+		if (personagem->x > tile->x + tile->largura) return false;
+		tile = tile->next;
+	}
+
+	return true;
 }
 
 void descarregar_mapa(Mapa* mapa) {

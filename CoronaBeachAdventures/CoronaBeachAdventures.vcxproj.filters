@@ -10,5 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mapa.h" />
+    <ClInclude Include="personagem.h" />
   </ItemGroup>
 </Project>
