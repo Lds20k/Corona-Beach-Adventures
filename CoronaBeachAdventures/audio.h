@@ -5,22 +5,22 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_audio.h>
 
-typedef struct Audio {
+typedef struct Musicas {
     ALLEGRO_AUDIO_STREAM* som;
-} Audio;
+} Musica;
 
 // Carrega um audio
-Audio carregar_audio(const char* local) {
-    Audio audio;
-    audio.som = al_load_audio_stream(local, 4, 1024);
-
-    if (!audio.som)
+Musica carregar_audio(const char* local) {
+    Musica musica;
+    musica.som = al_load_audio_stream(local, 4, 1024);
+    if (!musica.som)
     {
         printf("Erro ao carregar audio %s", local);
-        al_destroy_audio_stream(audio.som);
+        al_destroy_audio_stream(musica.som);
     }
     
-    return audio;
+    return musica;
 }
 
 #endif
+

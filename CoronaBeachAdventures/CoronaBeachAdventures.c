@@ -16,6 +16,7 @@
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_acodec.h>
 
+
 #include "sprites.h"
 #include "audio.h"
 #include "mapa.h"
@@ -29,6 +30,8 @@
 
 #define COR_PRETA al_map_rgb(0, 0, 0)
 
+enum TECLAS { ESQUERDA, DIREITA, CIMA, BAIXO };
+
 int main() {
 	ALLEGRO_DISPLAY *janela = NULL;
 	ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
@@ -36,6 +39,7 @@ int main() {
 
 	bool rodando = true;
 	bool desenhar = true;
+	bool teclas[] = {false,false,false,false};
 
 	// Inicia o allegro
 	if (!al_init()) {
@@ -81,7 +85,7 @@ int main() {
 	// Instala audio
 	if (!al_install_audio()) {
 		printf("Falha ao instalar o audio.\n");
-		return 0;
+		return 1;
 	}
 
 	// Instala teclado
@@ -102,7 +106,7 @@ int main() {
 	al_register_event_source(fila_eventos, al_get_keyboard_event_source());
 	al_register_event_source(fila_eventos, al_get_mouse_event_source());
 	
-
+	
 	// Desenha uma tela preta
 	al_clear_to_color(COR_PRETA);
 	al_flip_display();
@@ -121,13 +125,19 @@ int main() {
 	}
 
 	// Carrega uma audio
-	Audio musica = carregar_audio("soundtrack.ogg");
-
+	Musica musicaFundo;
+	musicaFundo = carregar_audio("soundtrack.ogg");
+	
 	// Define que o stream vai tocar no modo repeat
-	al_set_audio_stream_playmode(musica.som, ALLEGRO_PLAYMODE_LOOP);
+	al_set_audio_stream_playmode(musicaFundo.som, ALLEGRO_PLAYMODE_LOOP);
 
 	// Carrega mapa
 	Mapa* mapa = carregar_mapa("praia.bmp");
+
+	//carrega personagem
+	Personagem personagem;
+	personagem = carrega_personagem(&botoes, 0, 0, 16, 16, 0);
+
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -135,7 +145,7 @@ int main() {
 		ALLEGRO_TIMEOUT timeout;
 
 		// Conecta o audio no mixer
-		al_attach_audio_stream_to_mixer(musica.som, al_get_default_mixer());
+		al_attach_audio_stream_to_mixer(musicaFundo.som, al_get_default_mixer());
 
 		// Inicializa o timer
 		al_init_timeout(&timeout, 0.06);
@@ -146,6 +156,38 @@ int main() {
 		// Trata os eventos
 		if (get_event) {
 			switch (evento.type) {
+			case ALLEGRO_EVENT_KEY_DOWN:
+				switch (evento.keyboard.keycode) {
+				case ALLEGRO_KEY_LEFT:
+					teclas[ESQUERDA] = true;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					teclas[DIREITA] = true;
+					break;
+				case ALLEGRO_KEY_UP:
+					teclas[CIMA] = true;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					teclas[BAIXO] = true;
+					break;
+				}
+				break;
+			case ALLEGRO_EVENT_KEY_UP:
+				switch (evento.keyboard.keycode) {
+				case ALLEGRO_KEY_LEFT:
+					teclas[ESQUERDA] = false;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					teclas[DIREITA] = false;
+					break;
+				case ALLEGRO_KEY_UP:
+					teclas[CIMA] = false;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					teclas[BAIXO] = false;
+					break;
+				}
+				break;
 			case ALLEGRO_EVENT_TIMER:
 				desenhar = true;
 				break;
@@ -156,13 +198,23 @@ int main() {
 				fprintf(stderr, "Evento recebido nao suportado: %d\n", evento.type);
 				break;
 			}
+
 		}
+
+		if (verificar_colisao(mapa, &personagem)) printf("colidindo");
+
+		personagem.x += 5* teclas[DIREITA];
+		personagem.x -= 5* teclas[ESQUERDA];
+		personagem.y -= 5 * teclas[CIMA];
+		personagem.y += 5 * teclas[BAIXO];
+
 
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
 
-			al_draw_bitmap(botoes.imagem, 0, 0, 0);
+			al_draw_bitmap_region(personagem.sprite->imagem,personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura,personagem.x, personagem.y, 0);
+			//al_draw_bitmap(botoes.imagem, 0, 0, 0);
 			desenhar_mapa(mapa);
 			al_flip_display();
 			desenhar = false;
@@ -171,7 +223,8 @@ int main() {
 
 	// Limpa tudo
 	descarregar_mapa(mapa);
-	al_destroy_audio_stream(musica.som);
+	al_destroy_bitmap(personagem.sprite->imagem);
+	al_destroy_audio_stream(musicaFundo.som);
 	al_destroy_event_queue(fila_eventos);
 	al_destroy_display(janela);
 	return 0;
