@@ -146,20 +146,28 @@ void desenhar_mapa(Mapa* mapa) {
 	}
 }
 
+static bool verificar_colisao_de_tile(Tile* tile, Personagem* personagem) {
+	if (personagem->y + personagem->altura < tile->y) return false;
+	if (personagem->y > tile->y + tile->altura) return false;
+
+	if (personagem->largura + personagem->x < tile->x) return false;
+	if (personagem->x > tile->x + tile->largura) return false;
+	return true;
+}
+
 bool verificar_colisao(Mapa* mapa, Personagem* personagem) {
 	Tile* tile = mapa->tiles;
+	bool retorno = true;
 
 	while (tile != NULL) {
 
-		if (personagem->y + personagem->altura < tile->y) return false;
-		if (personagem->y > tile->y + tile->altura) return false;
-
-		if (personagem->largura + personagem->x < tile->x) return false;
-		if (personagem->x > tile->x + tile->largura) return false;
+		if (verificar_colisao_de_tile(tile, personagem)) {
+			return true;
+		}
 		tile = tile->next;
 	}
 
-	return true;
+	return false;
 }
 
 void descarregar_mapa(Mapa* mapa) {

@@ -201,7 +201,7 @@ int main() {
 
 		}
 
-		if (verificar_colisao(mapa, &personagem)) printf("colidindo");
+		if (verificar_colisao(mapa, &personagem)) printf("colidindo\n");
 
 		personagem.x += 5* teclas[DIREITA];
 		personagem.x -= 5* teclas[ESQUERDA];
