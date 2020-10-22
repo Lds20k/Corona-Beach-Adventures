@@ -30,6 +30,8 @@
 
 #define COR_PRETA al_map_rgb(0, 0, 0)
 
+#define ACELERACAO 0.15
+
 enum TECLAS { ESQUERDA, DIREITA, CIMA, BAIXO };
 
 int main() {
@@ -40,6 +42,10 @@ int main() {
 	bool rodando = true;
 	bool desenhar = true;
 	bool teclas[] = {false,false,false,false};
+
+	float velocidadeY = -1;
+	float velocidadeX = 3;
+	int contPulos = 0;
 
 	// Inicia o allegro
 	if (!al_init()) {
@@ -201,14 +207,30 @@ int main() {
 
 		}
 
-		if (verificar_colisao(mapa, &personagem)) printf("colidindo\n");
+		//verificador de colisao
+		if (verificar_colisao(mapa, &personagem)) {
+			velocidadeY = -1.8;
+			contPulos = 0;
+		}
+		else {
+			personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
+			velocidadeY-=ACELERACAO;
+		}
 
-		personagem.x += 5* teclas[DIREITA];
-		personagem.x -= 5* teclas[ESQUERDA];
-		personagem.y -= 5 * teclas[CIMA];
-		personagem.y += 5 * teclas[BAIXO];
+		//pulo
+		if (teclas[CIMA] && contPulos < 14) {
+			velocidadeY = 3;
+			personagem.y -= velocidadeY;
+			contPulos++;
+		}
 
-
+		//movimentacao no eixo x
+		if (teclas[DIREITA] || teclas[ESQUERDA]) {
+			personagem.x += velocidadeX * teclas[DIREITA];
+			personagem.x -= velocidadeX * teclas[ESQUERDA];
+		}
+		
+		
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
