@@ -144,14 +144,11 @@ int main() {
 	Personagem personagem;
 	personagem = carrega_personagem(&botoes, 0, 0, 16, 16, 0);
 
-
 	// Loop principal do jogo
 	while (rodando) {
+
 		ALLEGRO_EVENT evento;
 		ALLEGRO_TIMEOUT timeout;
-
-		// Conecta o audio no mixer
-		al_attach_audio_stream_to_mixer(musicaFundo.som, al_get_default_mixer());
 
 		// Inicializa o timer
 		al_init_timeout(&timeout, 0.06);
@@ -159,99 +156,87 @@ int main() {
 		// Busca o evento (se houver)
 		bool get_event = al_wait_for_event_until(fila_eventos, &evento, &timeout);
 
-		// Loop principal do jogo
-		while (rodando) {
+		//verifica se o timer ta rodando e desenha
+		if (evento.type == ALLEGRO_EVENT_TIMER) {
+			desenhar = true;
+}
 
-			ALLEGRO_EVENT evento;
-			ALLEGRO_TIMEOUT timeout;
-
-			// Inicializa o timer
-			al_init_timeout(&timeout, 0.06);
-
-			// Busca o evento (se houver)
-			bool get_event = al_wait_for_event_until(fila_eventos, &evento, &timeout);
-
-			//verifica se o timer ta rodando e desenha
-			if (evento.type == ALLEGRO_EVENT_TIMER) {
-				desenhar = true;
-			}
-
-			//verifica evento de clicar em uma tecla
-			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-				switch (evento.keyboard.keycode) {
-				case ALLEGRO_KEY_LEFT:
-					teclas[ESQUERDA] = true;
-					break;
-				case ALLEGRO_KEY_RIGHT:
-					teclas[DIREITA] = true;
-					break;
-				case ALLEGRO_KEY_UP:
-					teclas[CIMA] = true;
-					break;
-				case ALLEGRO_KEY_DOWN:
-					teclas[BAIXO] = true;
-					break;
-				}
-			}
-
-			//verifica senão teve coisao
-			if (!verificar_colisao(mapa, &personagem)) {
-				personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
-				velocidadeY -= ACELERACAO;
-			}
-
-			//verifica se teve colisao
-			if (verificar_colisao(mapa, &personagem)) {
-				velocidadeY = 0;
-				contPulos = 0;
-			}
-
-			//pulo
-			if (teclas[CIMA] && contPulos < 14) {
-				velocidadeY = 3;
-				personagem.y -= velocidadeY;
-				contPulos++;
-			}
-
-			//verifica se a tecla foi solta
-			if (evento.type == ALLEGRO_EVENT_KEY_UP) {
-				switch (evento.keyboard.keycode) {
-				case ALLEGRO_KEY_LEFT:
-					teclas[ESQUERDA] = false;
-					break;
-				case ALLEGRO_KEY_RIGHT:
-					teclas[DIREITA] = false;
-					break;
-				case ALLEGRO_KEY_UP:
-					teclas[CIMA] = false;
-					break;
-				case ALLEGRO_KEY_DOWN:
-					teclas[BAIXO] = false;
-					break;
-				}
-			}
-
-			//movimentacao no eixo x
-			if (teclas[DIREITA] || teclas[ESQUERDA]) {
-				personagem.x += velocidadeX * teclas[DIREITA];
-				personagem.x -= velocidadeX * teclas[ESQUERDA];
-			}
-
-			// Verica se é necessario limpar a tela
-			if (desenhar && al_is_event_queue_empty(fila_eventos)) {
-				al_clear_to_color(COR_PRETA);
-
-				al_draw_bitmap_region(personagem.sprite->imagem, personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura, personagem.x, personagem.y, 0);
-				desenhar_mapa(mapa);
-				al_flip_display();
-				desenhar = false;
-			}
-			//fecha a aba
-			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-				rodando = false;
-			}
+	//verifica evento de clicar em uma tecla
+	if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+		switch (evento.keyboard.keycode) {
+		case ALLEGRO_KEY_LEFT:
+			teclas[ESQUERDA] = true;
+			break;
+		case ALLEGRO_KEY_RIGHT:
+			teclas[DIREITA] = true;
+			break;
+		case ALLEGRO_KEY_UP:
+			teclas[CIMA] = true;
+			break;
+		case ALLEGRO_KEY_DOWN:
+			teclas[BAIXO] = true;
+			break;
 		}
 	}
+
+	//verifica senão teve coisao
+	if (!verificar_colisao(mapa, &personagem)) {
+		personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
+		velocidadeY -= ACELERACAO;
+	}
+
+	//verifica se teve colisao
+	if (verificar_colisao(mapa, &personagem)) {
+		velocidadeY = 0;
+		contPulos = 0;
+	}
+
+	//pulo
+	if (teclas[CIMA] && contPulos < 14) {
+		velocidadeY = 3;
+		personagem.y -= velocidadeY;
+		contPulos++;
+	}
+
+	//verifica se a tecla foi solta
+	if (evento.type == ALLEGRO_EVENT_KEY_UP) {
+		switch (evento.keyboard.keycode) {
+		case ALLEGRO_KEY_LEFT:
+			teclas[ESQUERDA] = false;
+			break;
+		case ALLEGRO_KEY_RIGHT:
+			teclas[DIREITA] = false;
+			break;
+		case ALLEGRO_KEY_UP:
+			teclas[CIMA] = false;
+			break;
+		case ALLEGRO_KEY_DOWN:
+			teclas[BAIXO] = false;
+			break;
+		}
+	}
+
+	//movimentacao no eixo x
+	if (teclas[DIREITA] || teclas[ESQUERDA]) {
+		personagem.x += velocidadeX * teclas[DIREITA];
+		personagem.x -= velocidadeX * teclas[ESQUERDA];
+	}
+
+	// Verica se é necessario limpar a tela
+	if (desenhar && al_is_event_queue_empty(fila_eventos)) {
+		al_clear_to_color(COR_PRETA);
+
+		al_draw_bitmap_region(personagem.sprite->imagem, personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura, personagem.x, personagem.y, 0);
+		desenhar_mapa(mapa);
+		al_flip_display();
+		desenhar = false;
+	}
+	//fecha a aba
+	if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+		rodando = false;
+	}
+}
+
 
 	// Limpa tudo
 	descarregar_mapa(mapa);
