@@ -46,6 +46,7 @@ int main() {
 	float velocidadeY = -1;
 	float velocidadeX = 3;
 	int contPulos = 0;
+	unsigned frames = 0;
 
 	// Inicia o allegro
 	if (!al_init()) {
@@ -120,10 +121,6 @@ int main() {
 	// Inicia o timer
 	al_start_timer(timer);
 
-	// Carregar um sprite
-	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
-	Sprite botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
-
 	// Cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
 	if (!al_reserve_samples(5)) {
 		printf("Falha ao reservar amostrar de audio");
@@ -140,107 +137,113 @@ int main() {
 	// Carrega mapa
 	Mapa* mapa = carregar_mapa("praia.bmp");
 
-	//carrega personagem
-	Personagem personagem;
-	personagem = carrega_personagem(&botoes, 0, 0, 16, 16, 0);
+	// Carrega personagem
+	// Carregar um sprite
+	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
+	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
+	Personagem* personagem = carrega_personagem(botoes, 0, 0, 16, 16);
 
 	// Loop principal do jogo
 	while (rodando) {
 
 		ALLEGRO_EVENT evento;
-		ALLEGRO_TIMEOUT timeout;
-
-		// Inicializa o timer
-		al_init_timeout(&timeout, 0.06);
 
 		// Busca o evento (se houver)
-		bool get_event = al_wait_for_event_until(fila_eventos, &evento, &timeout);
+		al_wait_for_event(fila_eventos, &evento);
 
-		//verifica se o timer ta rodando e desenha
-		if (evento.type == ALLEGRO_EVENT_TIMER) {
-			desenhar = true;
-}
+		if (evento.type) {
+			
+			// Verifica se o timer ta rodando e desenha
+			if (evento.type == ALLEGRO_EVENT_TIMER) {
+				desenhar = true;
+				frames++;
+			}
 
-	//verifica evento de clicar em uma tecla
-	if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-		switch (evento.keyboard.keycode) {
-		case ALLEGRO_KEY_LEFT:
-			teclas[ESQUERDA] = true;
-			break;
-		case ALLEGRO_KEY_RIGHT:
-			teclas[DIREITA] = true;
-			break;
-		case ALLEGRO_KEY_UP:
-			teclas[CIMA] = true;
-			break;
-		case ALLEGRO_KEY_DOWN:
-			teclas[BAIXO] = true;
-			break;
+			// Verifica se a tecla foi solta
+			if (evento.type == ALLEGRO_EVENT_KEY_UP) {
+				switch (evento.keyboard.keycode) {
+				case ALLEGRO_KEY_LEFT:
+					teclas[ESQUERDA] = false;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					teclas[DIREITA] = false;
+					break;
+				case ALLEGRO_KEY_UP:
+					teclas[CIMA] = false;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					teclas[BAIXO] = false;
+					break;
+				}
+			}
+
+			// Verifica evento de clicar em uma tecla
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+				switch (evento.keyboard.keycode) {
+					case ALLEGRO_KEY_LEFT:
+						teclas[ESQUERDA] = true;
+						break;
+					case ALLEGRO_KEY_RIGHT:
+						teclas[DIREITA] = true;
+						break;
+					case ALLEGRO_KEY_UP:
+						teclas[CIMA] = true;
+						break;
+					case ALLEGRO_KEY_DOWN:
+						teclas[BAIXO] = true;
+						break;
+				}
+			}
+
+			// Fecha a aba
+			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+				rodando = false;
+			}
+		}
+
+		// Verifica senão teve coisao
+		if (!colidiu_mapa(mapa, personagem)) {
+			personagem->posicao.y -= velocidadeY - (2.2 * teclas[BAIXO]);
+			velocidadeY -= ACELERACAO;
+		}
+
+		// Verifica se teve colisao
+		if (colidiu_mapa(mapa, personagem)) {
+			velocidadeY = 0;
+			contPulos = 0;
+		}
+
+		// Pulo
+		if (teclas[CIMA] && contPulos < 14) {
+			velocidadeY = 3;
+			personagem->posicao.y -= velocidadeY;
+			contPulos++;
+		}
+
+		// Movimentacao no eixo x
+		if (teclas[DIREITA] || teclas[ESQUERDA]) {
+			personagem->posicao.x += velocidadeX * teclas[DIREITA];
+			personagem->posicao.x -= velocidadeX * teclas[ESQUERDA];
+		}
+
+		// Verica se é necessario limpar a tela
+		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
+			al_clear_to_color(COR_PRETA);
+
+			desenhar_mapa(mapa);
+			desenhar_personagem(personagem);
+
+			printf("%d\n", frames);
+
+			al_flip_display();
+			desenhar = false;
 		}
 	}
-
-	//verifica senão teve coisao
-	if (!verificar_colisao(mapa, &personagem)) {
-		personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
-		velocidadeY -= ACELERACAO;
-	}
-
-	//verifica se teve colisao
-	if (verificar_colisao(mapa, &personagem)) {
-		velocidadeY = 0;
-		contPulos = 0;
-	}
-
-	//pulo
-	if (teclas[CIMA] && contPulos < 14) {
-		velocidadeY = 3;
-		personagem.y -= velocidadeY;
-		contPulos++;
-	}
-
-	//verifica se a tecla foi solta
-	if (evento.type == ALLEGRO_EVENT_KEY_UP) {
-		switch (evento.keyboard.keycode) {
-		case ALLEGRO_KEY_LEFT:
-			teclas[ESQUERDA] = false;
-			break;
-		case ALLEGRO_KEY_RIGHT:
-			teclas[DIREITA] = false;
-			break;
-		case ALLEGRO_KEY_UP:
-			teclas[CIMA] = false;
-			break;
-		case ALLEGRO_KEY_DOWN:
-			teclas[BAIXO] = false;
-			break;
-		}
-	}
-
-	//movimentacao no eixo x
-	if (teclas[DIREITA] || teclas[ESQUERDA]) {
-		personagem.x += velocidadeX * teclas[DIREITA];
-		personagem.x -= velocidadeX * teclas[ESQUERDA];
-	}
-
-	// Verica se é necessario limpar a tela
-	if (desenhar && al_is_event_queue_empty(fila_eventos)) {
-		al_clear_to_color(COR_PRETA);
-
-		al_draw_bitmap_region(personagem.sprite->imagem, personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura, personagem.x, personagem.y, 0);
-		desenhar_mapa(mapa);
-		al_flip_display();
-		desenhar = false;
-	}
-	//fecha a aba
-	if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-		rodando = false;
-	}
-}
 
 
 	// Limpa tudo
-	descarregar_mapa(mapa);
-	al_destroy_bitmap(personagem.sprite->imagem);
+	liberar_mapa(mapa);
+	al_destroy_bitmap(personagem->sprite->imagem);
 	al_destroy_audio_stream(musicaFundo.som);
 	al_destroy_event_queue(fila_eventos);
 	al_destroy_display(janela);

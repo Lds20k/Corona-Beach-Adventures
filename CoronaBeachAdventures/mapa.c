@@ -1,16 +1,20 @@
 #include "mapa.h"
 
 Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura) {
-	Tile* tile = (Tile*)malloc(sizeof(Tile));
+	Vetor2D posicao = { x, y };
+	Vetor2D caixa = { largura, altura };
+	CaixaDelimitadora dimensao = {caixa};
+
+	Tile* tile = malloc(sizeof(Tile));
 	if (tile == NULL) {
 		return NULL;
 	}
-	tile->x = x;
-	tile->y = y;
-	tile->largura = largura;
-	tile->altura = altura;
+
+	tile->posicao = posicao;
+	tile->dimensao = dimensao;
 	tile->sprite = sprite;
 	tile->next = NULL;
+
 	return tile;
 }
 
@@ -47,9 +51,9 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, con
 
 	if (tile_sheet == NULL) tile_sheet = carregar_imagem("corona_beach.bmp");
 
-	if (terra.imagem == NULL) terra = criar_sprite(tile_sheet, 16, 0, 16, 16, 0);
-	if (terra_direita.imagem == NULL) terra_direita = criar_sprite(tile_sheet, 0, 0, 16, 16, 0);
-	if (terra_esquerda.imagem == NULL) terra_esquerda = criar_sprite(tile_sheet, 0, 0, 16, 16, ALLEGRO_FLIP_HORIZONTAL);
+	if (terra == NULL) terra = criar_sprite(tile_sheet, 16, 0, 16, 16, 0);
+	if (terra_direita == NULL) terra_direita = criar_sprite(tile_sheet, 0, 0, 16, 16, 0);
+	if (terra_esquerda == NULL) terra_esquerda = criar_sprite(tile_sheet, 0, 0, 16, 16, ALLEGRO_FLIP_HORIZONTAL);
 
 	Sprite* sprite = NULL;
 
@@ -58,15 +62,15 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, con
 	}
 
 	if (!memcmp(&cor, &COR_VERMELHO, sizeof(ALLEGRO_COLOR))) {
-		sprite = &terra;
+		sprite = terra;
 	}
 
 	if (!memcmp(&cor, &COR_VERMELHO_ESCURO, sizeof(ALLEGRO_COLOR))) {
 		if (!memcmp(&cor_direita, &COR_VERMELHO, sizeof(ALLEGRO_COLOR)))
-			sprite = &terra_direita;
+			sprite = terra_direita;
 		else
 			if (!memcmp(&cor_esquerda, &COR_VERMELHO, sizeof(ALLEGRO_COLOR)))
-				sprite = &terra_esquerda;
+				sprite = terra_esquerda;
 	}
 
 	adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE);
@@ -74,26 +78,25 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, con
 }
 
 Mapa* carregar_mapa(const char* local) {
-	ALLEGRO_BITMAP* imagem_mapa = NULL;
 	Mapa* mapa = (Mapa*)malloc(sizeof(Mapa));
 	if (mapa == NULL) {
 		return NULL;
 	}
 
 	// Carrega o bitmap que contem as infomações do mapa
-	imagem_mapa = al_load_bitmap(local);
+	ALLEGRO_BITMAP* imagem_mapa = al_load_bitmap(local);
 	if (!imagem_mapa) {
 		printf("Erro ao carregar mapa %s\n", local);
 		return NULL;
 	}
 
+	Vetor2D dimensao = { al_get_bitmap_width(imagem_mapa), al_get_bitmap_height(imagem_mapa) };
 	mapa->tiles = NULL;
-	mapa->largura = al_get_bitmap_width(imagem_mapa);
-	mapa->altura = al_get_bitmap_height(imagem_mapa);
+	mapa->dimensao = dimensao;
 
 	// Adiciona tiles ao mapa com base na cor dos pixel de imagem_mapa
-	for (unsigned i = 0; i < mapa->altura; i++) {
-		for (unsigned j = 0; j < mapa->largura; j++) {
+	for (unsigned i = 0; i < mapa->dimensao.y; i++) {
+		for (unsigned j = 0; j < mapa->dimensao.x; j++) {
 			definir_tile(mapa, imagem_mapa, j, i);
 		}
 	}
@@ -106,36 +109,36 @@ void desenhar_mapa(Mapa* mapa) {
 	Tile* tile = mapa->tiles;
 	while (tile != NULL) {
 		Sprite* sprite = tile->sprite;
-		al_draw_bitmap_region(sprite->imagem, sprite->x, sprite->y, sprite->largura, sprite->altura, tile->x, tile->y, sprite->sinalizadores);
+		desenhar_sprite(sprite, &tile->posicao);
 		tile = tile->next;
 	}
 }
 
-static bool verificar_colisao_de_tile(Tile* tile, Personagem* personagem) {
-	if (personagem->y + personagem->altura < tile->y) return false;
-	if (personagem->y > tile->y + tile->altura) return false;
 
-	if (personagem->largura + personagem->x < tile->x) return false;
-	if (personagem->x > tile->x + tile->largura) return false;
-	return true;
+bool colidiu_tile(Tile* tile, Personagem* personagem) {
+	bool colidiu = verificar_colisao(&tile->dimensao, &tile->posicao, &personagem->dimensao, &personagem->posicao);
+	if (colidiu) {
+		if (tile->posicao.y - personagem->posicao.y + personagem->dimensao.vetor.y > 0) {
+			personagem->posicao.y = tile->posicao.y - personagem->dimensao.vetor.y;
+		}
+	}
+	return colidiu;
 }
 
-bool verificar_colisao(Mapa* mapa, Personagem* personagem) {
+bool colidiu_mapa(Mapa* mapa, Personagem* personagem) {
 	Tile* tile = mapa->tiles;
 	bool retorno = true;
 
 	while (tile != NULL) {
 
-		if (verificar_colisao_de_tile(tile, personagem)) {
-			return true;
-		}
+		if (colidiu_tile(tile, personagem)) return true;
 		tile = tile->next;
 	}
 
 	return false;
 }
 
-void descarregar_mapa(Mapa* mapa) {
+void liberar_mapa(Mapa* mapa) {
 	al_destroy_bitmap(tile_sheet);
 	liberar_tile(mapa->tiles);
 	free(mapa);

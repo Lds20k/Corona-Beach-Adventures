@@ -36,12 +36,21 @@
     <ClCompile Include="sprites.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="colisao.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="colisao.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mapa.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="personagem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vetor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

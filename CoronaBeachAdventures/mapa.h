@@ -2,33 +2,32 @@
 #include <stdlib.h>
 #include <allegro5/allegro.h>
 
-#ifndef MAPA_H
-#define MAPA_H
-
+#include "vetor.h"
+#include "colisao.h"
 #include "sprites.h"
 #include "personagem.h"
+
+#ifndef MAPA_H
+#define MAPA_H
 
 #define TAMANHO_DO_TILE 16
 
 static ALLEGRO_BITMAP* tile_sheet = NULL;
 
-Sprite terra;
-Sprite terra_direita;
-Sprite terra_esquerda;
+static Sprite* terra = NULL;
+static Sprite* terra_direita = NULL;
+static Sprite* terra_esquerda = NULL;
 
 typedef struct Tiles {
-	unsigned x;
-	unsigned y;
-	unsigned largura;
-	unsigned altura;
+	Vetor2D posicao;
+	CaixaDelimitadora dimensao;
 	Sprite* sprite;
-	struct Tile* next;
+	struct Tiles* next;
 } Tile;
 
 typedef struct Mapas {
 	Tile* tiles;
-	unsigned largura;
-	unsigned altura;
+	Vetor2D dimensao;
 } Mapa;
 
 // Cria um tile
@@ -48,10 +47,10 @@ Mapa* carregar_mapa(const char* local);
 
 void desenhar_mapa(Mapa* mapa);
 
-static bool verificar_colisao_de_tile(Tile* tile, Personagem* personagem);
+bool colidiu_tile(Tile* tile, Personagem* personagem);
 
-bool verificar_colisao(Mapa* mapa, Personagem* personagem);
+bool colidiu_mapa(Mapa* mapa, Personagem* personagem);
 
-void descarregar_mapa(Mapa* mapa);
+void liberar_mapa(Mapa* mapa);
 
 #endif
