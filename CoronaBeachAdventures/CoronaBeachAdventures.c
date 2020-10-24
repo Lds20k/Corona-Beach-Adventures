@@ -16,10 +16,10 @@
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_acodec.h>
 
-
 #include "sprites.h"
 #include "audio.h"
 #include "mapa.h"
+#include "personagem.h"
 
 #define FPS 60.f
 

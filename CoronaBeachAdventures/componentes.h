@@ -1,0 +1,2 @@
+#ifndef COMPONENTES_H
+#define COMPONENTES_H

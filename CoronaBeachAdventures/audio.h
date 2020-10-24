@@ -1,26 +1,17 @@
-#ifndef AUDIO_H
-#define AUDIO_H
-
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_audio.h>
+
+#ifndef AUDIO_H
+#define AUDIO_H
 
 typedef struct Musicas {
     ALLEGRO_AUDIO_STREAM* som;
 } Musica;
 
-// Carrega um audio
-Musica carregar_audio(const char* local) {
-    Musica musica;
-    musica.som = al_load_audio_stream(local, 4, 1024);
-    if (!musica.som)
-    {
-        printf("Erro ao carregar audio %s", local);
-        al_destroy_audio_stream(musica.som);
-    }
-    
-    return musica;
-}
+// Carrega um audio na memoria
+// local - caminho do arquivo do audio a ser carregado
+Musica carregar_audio(const char* local);
 
 #endif
 

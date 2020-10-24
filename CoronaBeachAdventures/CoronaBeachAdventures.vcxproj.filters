@@ -14,4 +14,38 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
-</Project> 
+  <ItemGroup>
+    <ClCompile Include="audio.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CoronaBeachAdventures.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mapa.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="personagem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mapa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="personagem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
