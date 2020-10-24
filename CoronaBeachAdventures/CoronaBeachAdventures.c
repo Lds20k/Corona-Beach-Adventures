@@ -159,10 +159,25 @@ int main() {
 		// Busca o evento (se houver)
 		bool get_event = al_wait_for_event_until(fila_eventos, &evento, &timeout);
 
-		// Trata os eventos
-		if (get_event) {
-			switch (evento.type) {
-			case ALLEGRO_EVENT_KEY_DOWN:
+		// Loop principal do jogo
+		while (rodando) {
+
+			ALLEGRO_EVENT evento;
+			ALLEGRO_TIMEOUT timeout;
+
+			// Inicializa o timer
+			al_init_timeout(&timeout, 0.06);
+
+			// Busca o evento (se houver)
+			bool get_event = al_wait_for_event_until(fila_eventos, &evento, &timeout);
+
+			//verifica se o timer ta rodando e desenha
+			if (evento.type == ALLEGRO_EVENT_TIMER) {
+				desenhar = true;
+			}
+
+			//verifica evento de clicar em uma tecla
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
 				switch (evento.keyboard.keycode) {
 				case ALLEGRO_KEY_LEFT:
 					teclas[ESQUERDA] = true;
@@ -177,8 +192,29 @@ int main() {
 					teclas[BAIXO] = true;
 					break;
 				}
-				break;
-			case ALLEGRO_EVENT_KEY_UP:
+			}
+
+			//verifica senão teve coisao
+			if (!verificar_colisao(mapa, &personagem)) {
+				personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
+				velocidadeY -= ACELERACAO;
+			}
+
+			//verifica se teve colisao
+			if (verificar_colisao(mapa, &personagem)) {
+				velocidadeY = 0;
+				contPulos = 0;
+			}
+
+			//pulo
+			if (teclas[CIMA] && contPulos < 14) {
+				velocidadeY = 3;
+				personagem.y -= velocidadeY;
+				contPulos++;
+			}
+
+			//verifica se a tecla foi solta
+			if (evento.type == ALLEGRO_EVENT_KEY_UP) {
 				switch (evento.keyboard.keycode) {
 				case ALLEGRO_KEY_LEFT:
 					teclas[ESQUERDA] = false;
@@ -193,53 +229,27 @@ int main() {
 					teclas[BAIXO] = false;
 					break;
 				}
-				break;
-			case ALLEGRO_EVENT_TIMER:
-				desenhar = true;
-				break;
-			case ALLEGRO_EVENT_DISPLAY_CLOSE:
-				rodando = false;
-				break;
-			default:
-				fprintf(stderr, "Evento recebido nao suportado: %d\n", evento.type);
-				break;
 			}
 
-		}
+			//movimentacao no eixo x
+			if (teclas[DIREITA] || teclas[ESQUERDA]) {
+				personagem.x += velocidadeX * teclas[DIREITA];
+				personagem.x -= velocidadeX * teclas[ESQUERDA];
+			}
 
-		//verificador de colisao
-		if (verificar_colisao(mapa, &personagem)) {
-			velocidadeY = -1.8;
-			contPulos = 0;
-		}
-		else {
-			personagem.y -= velocidadeY - (2.2 * teclas[BAIXO]);
-			velocidadeY-=ACELERACAO;
-		}
+			// Verica se é necessario limpar a tela
+			if (desenhar && al_is_event_queue_empty(fila_eventos)) {
+				al_clear_to_color(COR_PRETA);
 
-		//pulo
-		if (teclas[CIMA] && contPulos < 14) {
-			velocidadeY = 3;
-			personagem.y -= velocidadeY;
-			contPulos++;
-		}
-
-		//movimentacao no eixo x
-		if (teclas[DIREITA] || teclas[ESQUERDA]) {
-			personagem.x += velocidadeX * teclas[DIREITA];
-			personagem.x -= velocidadeX * teclas[ESQUERDA];
-		}
-		
-		
-		// Verica se é necessario limpar a tela
-		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
-			al_clear_to_color(COR_PRETA);
-
-			al_draw_bitmap_region(personagem.sprite->imagem,personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura,personagem.x, personagem.y, 0);
-			//al_draw_bitmap(botoes.imagem, 0, 0, 0);
-			desenhar_mapa(mapa);
-			al_flip_display();
-			desenhar = false;
+				al_draw_bitmap_region(personagem.sprite->imagem, personagem.sprite->x, personagem.sprite->y, personagem.sprite->largura, personagem.sprite->altura, personagem.x, personagem.y, 0);
+				desenhar_mapa(mapa);
+				al_flip_display();
+				desenhar = false;
+			}
+			//fecha a aba
+			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+				rodando = false;
+			}
 		}
 	}
 
