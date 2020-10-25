@@ -30,7 +30,11 @@
 
 #define COR_PRETA al_map_rgb(0, 0, 0)
 
-#define ACELERACAO 0.15
+#define GRAVIDADE 0.1
+#define VELOCIDADE_MAX_X 6
+#define VELOCIDADE_MAX_Y 20 
+#define ALTURA_MAX_PULO 15
+#define DELTA_PULO 1.5
 
 enum TECLAS { ESQUERDA, DIREITA, CIMA, BAIXO };
 
@@ -43,9 +47,8 @@ int main() {
 	bool desenhar = true;
 	bool teclas[] = { false,false,false,false };
 
-	float velocidadeY = -1;
-	float velocidadeX = 3;
-	int contPulos = 0;
+	float velocidadeGravidade = -1;
+	float alturaPulo = 0;
 	unsigned frames = 0;
 
 	// Inicia o allegro
@@ -142,6 +145,11 @@ int main() {
 	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 	Personagem* personagem = carrega_personagem(botoes, 0, 0, 16, 16);
+	
+	//cria um vetor que guarda a velocidade do personagem
+	Vetor2D velocidadePersonagem;
+	velocidadePersonagem.y = 0;
+	velocidadePersonagem.x = 0;
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -203,31 +211,44 @@ int main() {
 
 		// Verifica senão teve coisao
 		if (!colidiu_mapa(mapa, personagem)) {
-			personagem->posicao.y -= velocidadeY - (2.2 * teclas[BAIXO]);
-			velocidadeY -= ACELERACAO;
+			if (velocidadePersonagem.y <= VELOCIDADE_MAX_Y) {
+				velocidadePersonagem.y -= velocidadeGravidade - (2.2 * teclas[BAIXO]);
+				velocidadeGravidade -= GRAVIDADE;
+			}
 		}
 
 		// Verifica se teve colisao
 		if (colidiu_mapa(mapa, personagem)) {
-			velocidadeY = 0;
-			contPulos = 0;
+			velocidadeGravidade = 0;
+			velocidadePersonagem.y = 0;
+			alturaPulo = 0;
 		}
 
 		// Pulo
-		if (teclas[CIMA] && contPulos < 14) {
-			velocidadeY = 3;
-			personagem->posicao.y -= velocidadeY;
-			contPulos++;
+		if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
+			velocidadePersonagem.y -= DELTA_PULO;
+			alturaPulo += DELTA_PULO;
 		}
-		else {
+		else{
 			teclas[CIMA] = false;
 		}
 
 		// Movimentacao no eixo x
-		if (teclas[DIREITA] || teclas[ESQUERDA]) {
-			personagem->posicao.x += velocidadeX * teclas[DIREITA];
-			personagem->posicao.x -= velocidadeX * teclas[ESQUERDA];
+		if ((teclas[DIREITA] || teclas[ESQUERDA])){
+			//caso esteja no intervalo entre a maior e menor velocidade
+			if ((velocidadePersonagem.x < VELOCIDADE_MAX_X) && (velocidadePersonagem.x > -VELOCIDADE_MAX_X)) {
+				velocidadePersonagem.x += 0.6 * teclas[DIREITA];
+				velocidadePersonagem.x -= 0.6 * teclas[ESQUERDA];
+			}
+		}else{
+			if (colidiu_mapa(mapa, personagem)) {
+				velocidadePersonagem.x *= 0.85;
+			}
 		}
+
+		//movimentacao personagem
+		personagem->posicao.y += velocidadePersonagem.y;
+		personagem->posicao.x += velocidadePersonagem.x;
 
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {

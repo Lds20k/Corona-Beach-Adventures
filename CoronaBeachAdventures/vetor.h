@@ -2,8 +2,8 @@
 #define VETOR_H
 
 typedef struct Vetores2D {
-	int x;
-	int y;
+	float x;
+	float y;
 } Vetor2D;
 
 #endif
