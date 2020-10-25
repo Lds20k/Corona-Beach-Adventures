@@ -211,10 +211,12 @@ int main() {
 
 		// Verifica senão teve coisao
 		if (!colidiu_mapa(mapa, personagem)) {
+			//caso seja menor que o limite de velocidade 
 			if (velocidadePersonagem.y <= VELOCIDADE_MAX_Y) {
 				velocidadePersonagem.y -= velocidadeGravidade - (2.2 * teclas[BAIXO]);
 				velocidadeGravidade -= GRAVIDADE;
 			}
+			//senao continua na mesma velocidade/velocidade maxima de y
 		}
 
 		// Verifica se teve colisao
@@ -224,29 +226,43 @@ int main() {
 			alturaPulo = 0;
 		}
 
-		// Pulo
+		// Mecanica de Pulo
+		//se a tecla cima for acionada
+		//e 
+		//a altura do pulo for menor que a altura maxima permitida
 		if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
 			velocidadePersonagem.y -= DELTA_PULO;
 			alturaPulo += DELTA_PULO;
 		}
 		else{
+			//se a altura max do pulo for alcancada e necessario esperar ate colidir
 			teclas[CIMA] = false;
 		}
 
 		// Movimentacao no eixo x
+		//se alguma tecla de movimentacao do eixo x for pressionada
 		if ((teclas[DIREITA] || teclas[ESQUERDA])){
+
 			//caso esteja no intervalo entre a maior e menor velocidade
 			if ((velocidadePersonagem.x < VELOCIDADE_MAX_X) && (velocidadePersonagem.x > -VELOCIDADE_MAX_X)) {
 				velocidadePersonagem.x += 0.6 * teclas[DIREITA];
 				velocidadePersonagem.x -= 0.6 * teclas[ESQUERDA];
 			}
+			//caso ultrapasse os limites permanecer com o valor limite
+			//se permanecer com a tecla pressionada
 		}else{
+			//quando as teclas de alteracao do eixo x do vetor nao sao acionadas
+			//verificar se esta colidindo
+			//caso sim, o atrito faz com que o personagem perca velocidade
 			if (colidiu_mapa(mapa, personagem)) {
 				velocidadePersonagem.x *= 0.85;
 			}
+			//caso esteja no ar hipoteticamente nao há atrito
+			//ou seja, a velocidade de x permanece a mesma
 		}
 
 		//movimentacao personagem
+		//baseada no vetor do personagem
 		personagem->posicao.y += velocidadePersonagem.y;
 		personagem->posicao.x += velocidadePersonagem.x;
 
