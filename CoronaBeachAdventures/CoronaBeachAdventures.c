@@ -1,8 +1,8 @@
-/* -- Corona Beach Adventures -- 
+/* -- Corona Beach Adventures --
 * Projeto desenvolvido no Senac Santo Amaro para o
 * Projeto Integrado(PI) de Jogos Digitais do curso
 * de Ciência da Computação.
-* 
+*
 *  -- Feito por --
 * Daniel Bortoleti Melo
 * Lucas da Silva dos Santos
@@ -35,13 +35,13 @@
 enum TECLAS { ESQUERDA, DIREITA, CIMA, BAIXO };
 
 int main() {
-	ALLEGRO_DISPLAY *janela = NULL;
-	ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
-	ALLEGRO_TIMER *timer = NULL;
+	ALLEGRO_DISPLAY* janela = NULL;
+	ALLEGRO_EVENT_QUEUE* fila_eventos = NULL;
+	ALLEGRO_TIMER* timer = NULL;
 
 	bool rodando = true;
 	bool desenhar = true;
-	bool teclas[] = {false,false,false,false};
+	bool teclas[] = { false,false,false,false };
 
 	float velocidadeY = -1;
 	float velocidadeX = 3;
@@ -112,8 +112,8 @@ int main() {
 	al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
 	al_register_event_source(fila_eventos, al_get_keyboard_event_source());
 	al_register_event_source(fila_eventos, al_get_mouse_event_source());
-	
-	
+
+
 	// Desenha uma tela preta
 	al_clear_to_color(COR_PRETA);
 	al_flip_display();
@@ -124,13 +124,13 @@ int main() {
 	// Cria o mixer (e torna ele o mixer padrao), e adciona 5 samples de audio nele
 	if (!al_reserve_samples(5)) {
 		printf("Falha ao reservar amostrar de audio");
-		return 0;
+		return 1;
 	}
 
 	// Carrega uma audio
 	Musica musicaFundo;
 	musicaFundo = carregar_audio("soundtrack.ogg");
-	
+
 	// Define que o stream vai tocar no modo repeat
 	al_set_audio_stream_playmode(musicaFundo.som, ALLEGRO_PLAYMODE_LOOP);
 
@@ -152,11 +152,29 @@ int main() {
 		al_wait_for_event(fila_eventos, &evento);
 
 		if (evento.type) {
-			
+
 			// Verifica se o timer ta rodando e desenha
 			if (evento.type == ALLEGRO_EVENT_TIMER) {
 				desenhar = true;
 				frames++;
+			}
+
+			// Verifica evento de clicar em uma tecla
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+				switch (evento.keyboard.keycode) {
+				case ALLEGRO_KEY_LEFT:
+					teclas[ESQUERDA] = true;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					teclas[DIREITA] = true;
+					break;
+				case ALLEGRO_KEY_UP:
+					teclas[CIMA] = true;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					teclas[BAIXO] = true;
+					break;
+				}
 			}
 
 			// Verifica se a tecla foi solta
@@ -174,24 +192,6 @@ int main() {
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = false;
 					break;
-				}
-			}
-
-			// Verifica evento de clicar em uma tecla
-			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-				switch (evento.keyboard.keycode) {
-					case ALLEGRO_KEY_LEFT:
-						teclas[ESQUERDA] = true;
-						break;
-					case ALLEGRO_KEY_RIGHT:
-						teclas[DIREITA] = true;
-						break;
-					case ALLEGRO_KEY_UP:
-						teclas[CIMA] = true;
-						break;
-					case ALLEGRO_KEY_DOWN:
-						teclas[BAIXO] = true;
-						break;
 				}
 			}
 
@@ -218,6 +218,9 @@ int main() {
 			velocidadeY = 3;
 			personagem->posicao.y -= velocidadeY;
 			contPulos++;
+		}
+		else {
+			teclas[CIMA] = false;
 		}
 
 		// Movimentacao no eixo x
