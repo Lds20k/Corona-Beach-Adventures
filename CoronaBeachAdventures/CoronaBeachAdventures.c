@@ -152,7 +152,7 @@ int main() {
 	velocidadePersonagem.x = 0;
 
 	// Loop principal do jogo
-	while (rodando) {
+	while (rodando && !personagem->morto) {
 
 		ALLEGRO_EVENT evento;
 
@@ -181,6 +181,9 @@ int main() {
 					break;
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = true;
+					break;
+				case ALLEGRO_KEY_BACKSPACE:
+					diminuir_vida(personagem, 10);
 					break;
 				}
 			}
