@@ -11,9 +11,23 @@ Personagem* carrega_personagem(Sprite* sprite, int x, int y, int largura, int al
 	personagem->posicao = posicao;
 	personagem->dimensao = dimensao;
 	personagem->sprite = sprite;
+	personagem->vida = 100;
+	personagem->morto = false;
+
 	return personagem;
 }
 
 void desenhar_personagem(Personagem* personagem) {
 	desenhar_sprite(personagem->sprite, &personagem->posicao);
 }
+
+void diminuir_vida(Personagem* personagem, unsigned dano) {
+	if (dano >= personagem->vida) {
+		personagem->morto = true;
+		return;
+	}
+
+	personagem->vida = personagem->vida - dano;
+	printf("vida: %d\n", personagem->vida);
+}
+
