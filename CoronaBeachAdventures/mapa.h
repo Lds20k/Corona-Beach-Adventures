@@ -31,16 +31,16 @@ typedef struct Mapas {
 } Mapa;
 
 // Cria um tile
-Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura);
+Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura);
 
 // Cria uma lista de Tiles caso o parametro tile seja nulo
 // Caso não nulo, adiciona na lista
-void adicionar_tile(Tile** tile, Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura);
+void adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura);
 
 // Libera a memoria da lista de Tiles
 void liberar_tile(Tile* tile);
 
-void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, const unsigned y);
+void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const float x, const float y);
 
 // Carrega um mapa com base em uma imagem bitmap
 Mapa* carregar_mapa(const char* local);

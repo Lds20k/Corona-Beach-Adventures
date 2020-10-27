@@ -233,8 +233,7 @@ int main() {
 		if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
 			velocidadePersonagem.y -= DELTA_PULO;
 			alturaPulo += DELTA_PULO;
-		}
-		else{
+		}else{
 			//se a altura max do pulo for alcancada e necessario esperar ate colidir
 			teclas[CIMA] = false;
 		}

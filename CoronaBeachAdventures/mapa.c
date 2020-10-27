@@ -1,6 +1,6 @@
 #include "mapa.h"
 
-Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura) {
+Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura) {
 	Vetor2D posicao = { x, y };
 	Vetor2D caixa = { largura, altura };
 	CaixaDelimitadora dimensao = {caixa};
@@ -18,7 +18,7 @@ Tile* criar_tile(Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsig
 	return tile;
 }
 
-void adicionar_tile(Tile** tile, Sprite* sprite, unsigned x, unsigned y, unsigned largura, unsigned altura) {
+void adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura) {
 	if (*tile == NULL) {
 		*tile = criar_tile(sprite, x, y, largura, altura);
 	}
@@ -40,7 +40,7 @@ void liberar_tile(Tile* tile) {
 	}
 }
 
-void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, const unsigned y) {
+void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const float x, const float y) {
 	const ALLEGRO_COLOR cor = al_get_pixel(imagem_mapa, x, y);
 	const ALLEGRO_COLOR cor_direita = al_get_pixel(imagem_mapa, x + 1, y);
 	const ALLEGRO_COLOR cor_esquerda = al_get_pixel(imagem_mapa, x - 1, y);
@@ -74,7 +74,7 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const unsigned x, con
 	}
 
 	adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE);
-	printf("%d %d\t| %f %f %f\n", x, y, cor.r, cor.g, cor.b);
+	printf("%f %f\t| %f %f %f\n", x, y, cor.r, cor.g, cor.b);
 }
 
 Mapa* carregar_mapa(const char* local) {
