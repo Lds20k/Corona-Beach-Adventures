@@ -20,6 +20,7 @@
 #include "audio.h"
 #include "mapa.h"
 #include "personagem.h"
+#include "colisao.h"
 
 #define FPS 60.f
 
@@ -143,16 +144,21 @@ int main() {
 	// Carrega personagem
 	// Carregar um sprite
 	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
+	ALLEGRO_BITMAP* gameover = carregar_imagem("gameover.bmp");
+
+	Sprite* gameover_sprite = criar_sprite(gameover, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
-	Personagem* personagem = carrega_personagem(botoes, 0, 0, 16, 16);
+	Personagem* personagem = carrega_personagem(botoes, posicao_inicial.x, posicao_inicial.y, 16, 16);
 	
 	//cria um vetor que guarda a velocidade do personagem
 	Vetor2D velocidadePersonagem;
 	velocidadePersonagem.y = 0;
 	velocidadePersonagem.x = 0;
 
+	Vetor2D aux = { 0, 0 };
+
 	// Loop principal do jogo
-	while (rodando && !personagem->morto) {
+	while (rodando) {
 
 		ALLEGRO_EVENT evento;
 
@@ -184,6 +190,10 @@ int main() {
 					break;
 				case ALLEGRO_KEY_BACKSPACE:
 					diminuir_vida(personagem, 10);
+					break;
+				case ALLEGRO_KEY_ENTER:
+					if(verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
+						rodando = false;
 					break;
 				}
 			}
@@ -252,7 +262,7 @@ int main() {
 			}
 			//caso ultrapasse os limites permanecer com o valor limite
 			//se permanecer com a tecla pressionada
-		}else{
+		} else {
 			//quando as teclas de alteracao do eixo x do vetor nao sao acionadas
 			//verificar se esta colidindo
 			//caso sim, o atrito faz com que o personagem perca velocidade
@@ -268,14 +278,22 @@ int main() {
 		personagem->posicao.y += velocidadePersonagem.y;
 		personagem->posicao.x += velocidadePersonagem.x;
 
+		if (personagem->posicao.y > 580) {
+			diminuir_vida(personagem, 100);
+		}
+
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_PRETA);
-
-			desenhar_mapa(mapa);
-			desenhar_personagem(personagem);
-
-			printf("%d\n", frames);
+			
+			if (personagem->morto) {
+				desenhar_sprite(gameover_sprite, &aux);
+			} else {
+				desenhar_mapa(mapa);
+				desenhar_personagem(personagem);
+			}
+			
+			//printf("%d\n", frames);
 
 			al_flip_display();
 			desenhar = false;

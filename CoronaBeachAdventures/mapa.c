@@ -18,9 +18,10 @@ Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largu
 	return tile;
 }
 
-void adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura) {
+Tile* adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura) {
 	if (*tile == NULL) {
 		*tile = criar_tile(sprite, x, y, largura, altura);
+		return *tile;
 	}
 	else {
 		Tile* aux = *tile;
@@ -28,6 +29,7 @@ void adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, c
 			aux = aux->next;
 		}
 		aux->next = criar_tile(sprite, x, y, largura, altura);
+		return aux->next;
 	}
 }
 
@@ -49,21 +51,29 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const float x, const 
 	const ALLEGRO_COLOR COR_VERMELHO = al_map_rgb(255, 0, 0);
 	const ALLEGRO_COLOR COR_VERMELHO_ESCURO = al_map_rgb(127, 0, 0);
 
+	const ALLEGRO_COLOR COR_AZUL_CLARO = al_map_rgb(0, 148, 255);
+	const ALLEGRO_COLOR COR_PRETO = al_map_rgb(0, 0, 0);
+
 	if (tile_sheet == NULL) tile_sheet = carregar_imagem("corona_beach.bmp");
 
 	if (terra == NULL) terra = criar_sprite(tile_sheet, 16, 0, 16, 16, 0);
 	if (terra_direita == NULL) terra_direita = criar_sprite(tile_sheet, 0, 0, 16, 16, 0);
 	if (terra_esquerda == NULL) terra_esquerda = criar_sprite(tile_sheet, 0, 0, 16, 16, ALLEGRO_FLIP_HORIZONTAL);
+	if (placa == NULL) placa = criar_sprite(tile_sheet, 0, 48, 16, 16, 0);
 
 	Sprite* sprite = NULL;
 
-	if (!memcmp(&cor, &COR_BRANCO, sizeof(ALLEGRO_COLOR))) {
-		return true;
+	if (!memcmp(&cor, &COR_BRANCO, sizeof(ALLEGRO_COLOR))) return;
+
+	if (!memcmp(&cor, &COR_AZUL_CLARO, sizeof(ALLEGRO_COLOR))) {
+		Vetor2D aux = { x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE };
+		posicao_inicial = aux;
+		return;
 	}
 
-	if (!memcmp(&cor, &COR_VERMELHO, sizeof(ALLEGRO_COLOR))) {
-		sprite = terra;
-	}
+	if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) sprite = placa;
+
+	if (!memcmp(&cor, &COR_VERMELHO, sizeof(ALLEGRO_COLOR))) sprite = terra;
 
 	if (!memcmp(&cor, &COR_VERMELHO_ESCURO, sizeof(ALLEGRO_COLOR))) {
 		if (!memcmp(&cor_direita, &COR_VERMELHO, sizeof(ALLEGRO_COLOR)))
@@ -73,7 +83,8 @@ void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const float x, const 
 				sprite = terra_esquerda;
 	}
 
-	adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE);
+	Tile* tile_criado = adicionar_tile(&mapa->tiles, sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE);
+	if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) finalizador = tile_criado;
 	printf("%f %f\t| %f %f %f\n", x, y, cor.r, cor.g, cor.b);
 }
 

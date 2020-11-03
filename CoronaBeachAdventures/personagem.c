@@ -1,6 +1,6 @@
 #include "personagem.h"
 
-Personagem* carrega_personagem(Sprite* sprite, int x, int y, int largura, int altura) {
+Personagem* carrega_personagem(Sprite* sprite, float x, float y, float largura, float altura) {
 	Vetor2D posicao = { x, y };
 	Vetor2D caixa = { largura, altura };
 	CaixaDelimitadora dimensao = { caixa };

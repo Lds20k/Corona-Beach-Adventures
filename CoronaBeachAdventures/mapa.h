@@ -12,12 +12,6 @@
 
 #define TAMANHO_DO_TILE 16
 
-static ALLEGRO_BITMAP* tile_sheet = NULL;
-
-static Sprite* terra = NULL;
-static Sprite* terra_direita = NULL;
-static Sprite* terra_esquerda = NULL;
-
 typedef struct Tiles {
 	Vetor2D posicao;
 	CaixaDelimitadora dimensao;
@@ -30,12 +24,22 @@ typedef struct Mapas {
 	Vetor2D dimensao;
 } Mapa;
 
+Tile* finalizador;
+Vetor2D posicao_inicial;
+
+static ALLEGRO_BITMAP* tile_sheet = NULL;
+
+static Sprite* terra = NULL;
+static Sprite* terra_direita = NULL;
+static Sprite* terra_esquerda = NULL;
+static Sprite* placa = NULL;
+
 // Cria um tile
 Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura);
 
 // Cria uma lista de Tiles caso o parametro tile seja nulo
 // Caso não nulo, adiciona na lista
-void adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura);
+Tile* adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura);
 
 // Libera a memoria da lista de Tiles
 void liberar_tile(Tile* tile);

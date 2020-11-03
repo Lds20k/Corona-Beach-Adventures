@@ -16,7 +16,7 @@ typedef struct Personagens {
 
 } Personagem;
 
-Personagem* carrega_personagem(Sprite* sprite, int x, int y, int largura, int altura);
+Personagem* carrega_personagem(Sprite* sprite, float x, float y, float largura, float altura);
 void desenhar_personagem(Personagem* personagem);
 
 void diminuir_vida(Personagem* personagem, unsigned dano);
