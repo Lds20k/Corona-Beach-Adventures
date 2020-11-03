@@ -145,8 +145,10 @@ int main() {
 	// Carregar um sprite
 	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
 	ALLEGRO_BITMAP* gameover = carregar_imagem("gameover.bmp");
+	ALLEGRO_BITMAP* vitoria_img = carregar_imagem("vitoria.bmp");
 
 	Sprite* gameover_sprite = criar_sprite(gameover, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
+	Sprite* vitoria_sprite = criar_sprite(vitoria_img, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 	Personagem* personagem = carrega_personagem(botoes, posicao_inicial.x, posicao_inicial.y, 16, 16);
 	
@@ -156,6 +158,7 @@ int main() {
 	velocidadePersonagem.x = 0;
 
 	Vetor2D aux = { 0, 0 };
+	bool vitoria = false;
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -193,7 +196,7 @@ int main() {
 					break;
 				case ALLEGRO_KEY_ENTER:
 					if(verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
-						rodando = false;
+						vitoria = true;
 					break;
 				}
 			}
@@ -289,8 +292,12 @@ int main() {
 			if (personagem->morto) {
 				desenhar_sprite(gameover_sprite, &aux);
 			} else {
-				desenhar_mapa(mapa);
-				desenhar_personagem(personagem);
+				if (vitoria) {
+					desenhar_sprite(vitoria_sprite, &aux);
+				} else {
+					desenhar_mapa(mapa);
+					desenhar_personagem(personagem);
+				}
 			}
 			
 			//printf("%d\n", frames);
