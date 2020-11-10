@@ -225,6 +225,13 @@ int main() {
 			}
 		}
 
+		Tile* tile_colidido = colidiu_mapa(mapa, personagem);
+		if (tile_colidido != NULL) {
+			printf("%s\n", tile_colidido->tipo);
+		}
+		
+		/*
+
 		// Verifica senão teve coisao
 		if (!colidiu_mapa(mapa, personagem)) {
 			//caso seja menor que o limite de velocidade 
@@ -284,6 +291,7 @@ int main() {
 		if (personagem->posicao.y > 580) {
 			diminuir_vida(personagem, 100);
 		}
+		*/
 
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {

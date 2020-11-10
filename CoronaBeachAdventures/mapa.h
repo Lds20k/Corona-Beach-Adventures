@@ -16,11 +16,16 @@ typedef struct Tiles {
 	Vetor2D posicao;
 	CaixaDelimitadora dimensao;
 	Sprite* sprite;
-	struct Tiles* next;
+	char* tipo;
 } Tile;
 
+typedef struct ListaTiles {
+	Tile* tile;
+	struct ListaTiles* next;
+} ListaTile;
+
 typedef struct Mapas {
-	Tile* tiles;
+	ListaTile* tiles;
 	Vetor2D dimensao;
 } Mapa;
 
@@ -35,16 +40,15 @@ static Sprite* terra_esquerda = NULL;
 static Sprite* placa = NULL;
 
 // Cria um tile
-Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura);
+Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura, const char* tipo);
 
-// Cria uma lista de Tiles caso o parametro tile seja nulo
-// Caso não nulo, adiciona na lista
-Tile* adicionar_tile(Tile** tile, Sprite* sprite, const float x, const float y, const float largura, const float altura);
+// Adiciona um item na lista de tiles
+void adicionar_tile(ListaTile* tiles, Tile* tile);
 
 // Libera a memoria da lista de Tiles
-void liberar_tile(Tile* tile);
+void liberar_tile(ListaTile* tiles);
 
-void definir_tile(Mapa* mapa, ALLEGRO_BITMAP* imagem_mapa, const float x, const float y);
+void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, const float y);
 
 // Carrega um mapa com base em uma imagem bitmap
 Mapa* carregar_mapa(const char* local);
@@ -53,7 +57,7 @@ void desenhar_mapa(Mapa* mapa);
 
 bool colidiu_tile(Tile* tile, Personagem* personagem);
 
-bool colidiu_mapa(Mapa* mapa, Personagem* personagem);
+Tile* colidiu_mapa(Mapa* mapa, Personagem* personagem);
 
 void liberar_mapa(Mapa* mapa);
 
