@@ -31,11 +31,12 @@
 
 #define COR_PRETA al_map_rgb(0, 0, 0)
 
-#define GRAVIDADE 0.1
+#define GRAVIDADE 0.085
 #define VELOCIDADE_MAX_X 6
 #define VELOCIDADE_MAX_Y 20 
 #define ALTURA_MAX_PULO 15
-#define DELTA_PULO 1.5
+#define DELTA_PULO 1.2
+#define REBOTE_Y 0.3
 
 enum TECLAS { ESQUERDA, DIREITA, CIMA, BAIXO };
 
@@ -227,9 +228,107 @@ int main() {
 
 		Tile* tile_colidido = colidiu_mapa(mapa, personagem);
 		if (tile_colidido != NULL) {
-			printf("%s\n", tile_colidido->tipo);
+
+			// verifica quando colidi na vertical
+			if (velocidadePersonagem.y != 0) {
+				// colisao de cima para baixo
+				if (velocidadePersonagem.y > 0){
+					personagem->posicao.y = tile_colidido->posicao.y - personagem->dimensao.vetor.y;
+
+					// reinicia os valores caso haja colisao
+					velocidadeGravidade = 0;
+					velocidadePersonagem.y = 0;
+					alturaPulo = 0;
+				}
+				else {
+					// colisao de baixo para cima
+					personagem->posicao.y = (tile_colidido->posicao.y + tile_colidido->dimensao.vetor.y);
+					velocidadePersonagem.y *= -REBOTE_Y;
+				}
+			}
+
+			float cantoEsqPlataforma = tile_colidido->posicao.x;
+			float cantoDirPlataforma = tile_colidido->posicao.x + tile_colidido->dimensao.vetor.x;
+			float cantoEsqPersonagem = personagem->posicao.x;
+			float cantoDirPersonagem = personagem->posicao.x + personagem->dimensao.vetor.x;
+			float eixoPersonagem = personagem->dimensao.vetor.x/2;
+			
+			// verifica se colidiu com o canto esquerdo com objeto em direcao a direita
+			// ha um rebote com perda de forca
+			if (velocidadePersonagem.x > 0 && cantoEsqPlataforma <= cantoDirPersonagem && cantoEsqPlataforma >= cantoDirPersonagem - (eixoPersonagem * 0.5)) {
+				printf("olha o rebote para esquerda");
+				velocidadePersonagem.x = 0;
+			}
+			
+			/*
+			* falta ajustes
+			// verifica se colidiu com o canto direito com objeto em direcao a esquerda
+			// ha um rebote com perda de forca
+			if (velocidadePersonagem.x < 0 && cantoDirPlataforma >= cantoEsqPersonagem && cantoDirPlataforma <= cantoEsqPersonagem + (eixoPersonagem * 0.5)) {
+				printf("pqp");
+				velocidadePersonagem.x = 0;
+			}
+			*/
+
+			// Inicio pulo quando colidir
+			if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
+				velocidadePersonagem.y -= DELTA_PULO;
+				alturaPulo += DELTA_PULO;
+			}
+
+			// Movimentacao no eixo x
+			//enquando esta colidindo
+			if ((teclas[DIREITA] || teclas[ESQUERDA])) {
+
+				//caso esteja no intervalo entre a maior e menor velocidade
+				if ((velocidadePersonagem.x < VELOCIDADE_MAX_X) && (velocidadePersonagem.x > -VELOCIDADE_MAX_X)) {
+					velocidadePersonagem.x += 0.6 * teclas[DIREITA];
+					velocidadePersonagem.x -= 0.6 * teclas[ESQUERDA];
+				}
+			} else {
+				velocidadePersonagem.x *= 0.5;
+			}
 		}
-		
+
+		//quando nao ha colisao
+		if (tile_colidido == NULL) {
+
+			// Mecanica de Pulo
+			//se a tecla cima for acionada
+			//e 
+			//a altura do pulo for menor que a altura maxima permitida
+			//e 
+			//nao estiver colidindo com nada
+			if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
+				velocidadePersonagem.y -= DELTA_PULO;
+				alturaPulo += DELTA_PULO;
+			}
+			else {
+				//se a altura max do pulo for alcancada e necessario esperar ate colidir
+				teclas[CIMA] = false;
+			}
+
+			//caso seja menor que o limite de velocidade 
+			if (velocidadePersonagem.y <= VELOCIDADE_MAX_Y) {
+				velocidadePersonagem.y -= velocidadeGravidade - (2.2 * teclas[BAIXO]);
+				velocidadeGravidade -= GRAVIDADE;
+			}
+			//senao continua na mesma velocidade/velocidade maxima de y
+
+				// Movimentacao no eixo x
+			//enquando esta colidindo
+			if ((teclas[DIREITA] || teclas[ESQUERDA])) {
+
+				//caso esteja no intervalo entre a maior e menor velocidade
+				if ((velocidadePersonagem.x < VELOCIDADE_MAX_X) && (velocidadePersonagem.x > -VELOCIDADE_MAX_X)) {
+					velocidadePersonagem.x += 0.6 * teclas[DIREITA];
+					velocidadePersonagem.x -= 0.6 * teclas[ESQUERDA];
+				}
+			}
+			else {
+				velocidadePersonagem.x *= 0.5;
+			}
+		}
 		/*
 
 		// Verifica senão teve coisao
@@ -283,6 +382,8 @@ int main() {
 			//ou seja, a velocidade de x permanece a mesma
 		}
 
+		
+		*/
 		//movimentacao personagem
 		//baseada no vetor do personagem
 		personagem->posicao.y += velocidadePersonagem.y;
@@ -291,7 +392,6 @@ int main() {
 		if (personagem->posicao.y > 580) {
 			diminuir_vida(personagem, 100);
 		}
-		*/
 
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
