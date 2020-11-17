@@ -21,6 +21,7 @@
 #include "mapa.h"
 #include "personagem.h"
 #include "colisao.h"
+#include "mascara.h"
 
 #define FPS 60.f
 
@@ -158,6 +159,9 @@ int main() {
 	velocidadePersonagem.y = 0;
 	velocidadePersonagem.x = 0;
 
+	//cria a mascara para uso do personagem
+	Mascara* mascara = carrega_mascara(100);  // mascara leve 100 - mascara media 500 - mascara pesada 1000
+
 	Vetor2D aux = { 0, 0 };
 	bool vitoria = false;
 
@@ -196,8 +200,15 @@ int main() {
 					diminuir_vida(personagem, 10);
 					break;
 				case ALLEGRO_KEY_ENTER:
-					if(verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
+					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
 						vitoria = true;
+					break;
+				case ALLEGRO_KEY_Q:
+					if (mascara->vida > 0) {
+						mascara->usando = true;
+					}else{
+						mascara->usando = false;
+					}
 					break;
 				}
 			}
@@ -217,6 +228,9 @@ int main() {
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = false;
 					break;
+				case ALLEGRO_KEY_Q:
+					mascara->usando = false;
+					break;
 				}
 			}
 
@@ -224,6 +238,11 @@ int main() {
 			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 				rodando = false;
 			}
+		}
+
+		printf("\n%u", mascara->vida);
+		if (mascara->usando && frames%30 == 0){
+			mascara->vida = usando_mascara(*mascara);
 		}
 
 		Tile* tile_colidido = colidiu_mapa(mapa, personagem);

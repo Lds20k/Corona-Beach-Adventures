@@ -178,6 +178,7 @@
     <ClCompile Include="colisao.h" />
     <ClCompile Include="CoronaBeachAdventures.c" />
     <ClCompile Include="mapa.c" />
+    <ClCompile Include="mascara.c" />
     <ClCompile Include="personagem.c" />
     <ClCompile Include="sprites.c" />
     <ClCompile Include="sprites.h" />
@@ -187,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mapa.h" />
+    <ClInclude Include="mascara.h" />
     <ClInclude Include="personagem.h" />
     <ClInclude Include="vetor.h" />
   </ItemGroup>
