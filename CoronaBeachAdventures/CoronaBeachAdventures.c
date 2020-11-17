@@ -15,6 +15,8 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 #include "sprites.h"
 #include "audio.h"
@@ -94,6 +96,22 @@ int main() {
 		return 1;
 	}
 
+	al_init_font_addon();
+
+	// Inicialização do add-on para uso de fontes True Type 
+	if (!al_init_ttf_addon()) {
+		printf("Falha ao inicializar add-on allegro_ttf ");
+		return 1;
+	}
+
+	// Carregando o arquivo de fonte
+	ALLEGRO_FONT* fonte = NULL;
+	fonte = al_load_font("arial.ttf", 14, 0);
+	if (!fonte) {
+		al_destroy_display(janela);
+		printf("Falha a carregar a fonte");
+		return 1;
+	}
 	// Instala audio
 	if (!al_install_audio()) {
 		printf("Falha ao instalar o audio.\n");
@@ -147,11 +165,13 @@ int main() {
 	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
 	ALLEGRO_BITMAP* gameover = carregar_imagem("gameover.bmp");
 	ALLEGRO_BITMAP* vitoria_img = carregar_imagem("vitoria.bmp");
+	ALLEGRO_BITMAP* vida = carregar_imagem("corona_beach.bmp");
 
 	Sprite* gameover_sprite = criar_sprite(gameover, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* vitoria_sprite = criar_sprite(vitoria_img, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 	Personagem* personagem = carrega_personagem(botoes, posicao_inicial.x, posicao_inicial.y, 16, 16);
+	Sprite* vida_sprite = criar_sprite(vida, 0, 32, 16, 16, 0);
 	
 	//cria um vetor que guarda a velocidade do personagem
 	Vetor2D velocidadePersonagem;
@@ -405,6 +425,8 @@ int main() {
 				} else {
 					desenhar_mapa(mapa);
 					desenhar_personagem(personagem);
+					desenhar_sprite(vida_sprite, &aux);
+					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
 				}
 			}
 			
