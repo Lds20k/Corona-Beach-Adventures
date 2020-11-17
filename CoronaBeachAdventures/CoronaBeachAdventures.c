@@ -233,8 +233,6 @@ int main() {
 				case ALLEGRO_KEY_Q:
 					if (mascara->vida > 0) {
 						mascara->usando = true;
-					}else{
-						mascara->usando = false;
 					}
 					break;
 				}
@@ -255,9 +253,6 @@ int main() {
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = false;
 					break;
-				case ALLEGRO_KEY_Q:
-					mascara->usando = false;
-					break;
 				}
 			}
 
@@ -268,8 +263,15 @@ int main() {
 		}
 
 		printf("\n%u", mascara->vida);
-		if (mascara->usando && frames%30 == 0){
+		if (mascara->usando && frames % 30 == 0){
 			mascara->vida = usando_mascara(*mascara);
+		}
+
+		if (mascara->vida <= 0) mascara->usando = false;
+
+		AreaTransmicao* area = colidiu_area(mapa, personagem);
+		if (area != NULL && frames % 30 == 0 && mascara->usando == false) {
+			diminuir_vida(personagem, 5);
 		}
 
 		Tile* tile_colidido = colidiu_mapa(mapa, personagem);
@@ -388,10 +390,6 @@ int main() {
 
 		if (personagem->posicao.y > 580) {
 			diminuir_vida(personagem, 100);
-		}
-
-		if (colidiu_area(mapa, personagem)) {
-			printf("na area\n");
 		}
 
 		// Verica se é necessario limpar a tela
