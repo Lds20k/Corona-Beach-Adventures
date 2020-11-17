@@ -16,12 +16,15 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 #include "sprites.h"
 #include "audio.h"
 #include "mapa.h"
 #include "personagem.h"
 #include "colisao.h"
+#include "mascara.h"
 
 #define FPS 60.f
 
@@ -101,6 +104,22 @@ int main() {
 		return 1;
 	}
 
+	al_init_font_addon();
+
+	// Inicialização do add-on para uso de fontes True Type 
+	if (!al_init_ttf_addon()) {
+		printf("Falha ao inicializar add-on allegro_ttf ");
+		return 1;
+	}
+
+	// Carregando o arquivo de fonte
+	ALLEGRO_FONT* fonte = NULL;
+	fonte = al_load_font("arial.ttf", 14, 0);
+	if (!fonte) {
+		al_destroy_display(janela);
+		printf("Falha a carregar a fonte");
+		return 1;
+	}
 	// Instala audio
 	if (!al_install_audio()) {
 		printf("Falha ao instalar o audio.\n");
@@ -154,16 +173,21 @@ int main() {
 	ALLEGRO_BITMAP* bmp_botoes = carregar_imagem("ui.bmp");
 	ALLEGRO_BITMAP* gameover = carregar_imagem("gameover.bmp");
 	ALLEGRO_BITMAP* vitoria_img = carregar_imagem("vitoria.bmp");
+	ALLEGRO_BITMAP* vida = carregar_imagem("corona_beach.bmp");
 
 	Sprite* gameover_sprite = criar_sprite(gameover, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* vitoria_sprite = criar_sprite(vitoria_img, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 	Personagem* personagem = carrega_personagem(botoes, posicao_inicial.x, posicao_inicial.y, 16, 16);
+	Sprite* vida_sprite = criar_sprite(vida, 0, 32, 16, 16, 0);
 	
 	//cria um vetor que guarda a velocidade do personagem
 	Vetor2D velocidadePersonagem;
 	velocidadePersonagem.y = 0;
 	velocidadePersonagem.x = 0;
+
+	//cria a mascara para uso do personagem
+	Mascara* mascara = carrega_mascara(100);  // mascara leve 100 - mascara media 500 - mascara pesada 1000
 
 	Vetor2D aux = { 0, 0 };
 	bool vitoria = false;
@@ -203,8 +227,15 @@ int main() {
 					diminuir_vida(personagem, 10);
 					break;
 				case ALLEGRO_KEY_ENTER:
-					if(verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
+					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
 						vitoria = true;
+					break;
+				case ALLEGRO_KEY_Q:
+					if (mascara->vida > 0) {
+						mascara->usando = true;
+					}else{
+						mascara->usando = false;
+					}
 					break;
 				}
 			}
@@ -224,6 +255,9 @@ int main() {
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = false;
 					break;
+				case ALLEGRO_KEY_Q:
+					mascara->usando = false;
+					break;
 				}
 			}
 
@@ -231,6 +265,11 @@ int main() {
 			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 				rodando = false;
 			}
+		}
+
+		printf("\n%u", mascara->vida);
+		if (mascara->usando && frames%30 == 0){
+			mascara->vida = usando_mascara(*mascara);
 		}
 
 		Tile* tile_colidido = colidiu_mapa(mapa, personagem);
@@ -367,6 +406,8 @@ int main() {
 				} else {
 					desenhar_mapa(mapa);
 					desenhar_personagem(personagem);
+					desenhar_sprite(vida_sprite, &aux);
+					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
 				}
 			}
 			
