@@ -38,10 +38,36 @@ void liberar_tile(ListaTile* tiles) {
 	ListaTile* aux = tiles;
 	while (tiles != NULL) {
 		aux = tiles->next;
-		free(tiles->tile->tipo);
 		free(tiles->tile);
 		free(tiles);
 		tiles = aux;
+	}
+}
+
+void adicionar_area(ListaArea* areas, AreaTransmicao* area) {
+	ListaArea* aux = areas;
+	if (aux->area == NULL) {
+		aux->area = area;
+	}
+	else {
+		while (aux->next != NULL) aux = aux->next;
+
+		aux->next = malloc(sizeof(ListaTile));
+		if (aux->next == NULL) return;
+		aux = aux->next;
+
+		aux->area = area;
+		aux->next = NULL;
+	}
+}
+
+void liberar_area(ListaArea* areas) {
+	ListaArea* aux = areas;
+	while (areas != NULL) {
+		aux = areas->next;
+		free(areas->area);
+		free(areas);
+		areas = aux;
 	}
 }
 
@@ -77,12 +103,12 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 
 	if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) { 
 		sprite = placa;
-		strcpy_s(tipo, 7,"objeto");
+		tipo = "objeto";
 	}
 
 	if (!memcmp(&cor, &COR_VERMELHO, sizeof(ALLEGRO_COLOR))) { 
 		sprite = terra;
-		strcpy_s(tipo, 7, "bloco");
+		tipo = "bloco";
 	}
 
 	if (!memcmp(&cor, &COR_VERMELHO_ESCURO, sizeof(ALLEGRO_COLOR))) {
@@ -93,7 +119,7 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 				sprite = terra_esquerda;
 			}
 		}
-		strcpy_s(tipo, 7,"bloco");
+		tipo = "bloco";
 	}
 
 	if (sprite == NULL) return;
@@ -111,8 +137,16 @@ Mapa* carregar_mapa(const char* local) {
 		return NULL;
 	}
 
+	const const rsize_t tamanho = sizeof(char) * 40;
+
+	char* image_local = malloc(tamanho);
+	if (image_local == NULL)
+		return NULL;
+	strcpy_s(image_local, tamanho, local);
+	strcat_s(image_local, tamanho, ".bmp");
+
 	// Carrega o bitmap que contem as infomações do mapa
-	ALLEGRO_BITMAP* imagem_mapa = al_load_bitmap(local);
+	ALLEGRO_BITMAP* imagem_mapa = al_load_bitmap(image_local);
 	if (!imagem_mapa) {
 		printf("Erro ao carregar mapa %s\n", local);
 		return NULL;
@@ -132,12 +166,79 @@ Mapa* carregar_mapa(const char* local) {
 		}
 	}
 
+	ListaArea* areas = malloc(sizeof(ListaArea));
+	if (areas == NULL)
+		return NULL;
+	areas->area = NULL;
+	areas->next = NULL;
+	
+	char* area_local = malloc(tamanho);
+	if (area_local == NULL)
+		return NULL;
+	strcpy_s(area_local, sizeof(char) * 30, local);
+	strcat_s(area_local, sizeof(char) * 30, ".dat");
+
+	ALLEGRO_FILE* areasContMapa = NULL;
+	areasContMapa = al_fopen(area_local, "r");
+
+	char* buffer = malloc(tamanho);
+	char* pbuffer = NULL;
+	while (!al_feof(areasContMapa)) {
+		pbuffer = al_fgets(areasContMapa, buffer, tamanho);
+		if (pbuffer != NULL) {
+			char* aux = NULL;
+			int flag = 0;
+			AreaTransmicao* area = malloc(sizeof(AreaTransmicao));
+			do {
+				char* data = (aux == NULL) ? strchr(pbuffer, ' ') + 1 : aux;
+
+				char* aux2 = strchr(data, ',');
+				if (aux2 == NULL) { 
+					aux2 = strchr(data, ';'); 
+					aux = NULL;
+				} else {
+					aux = strchr(aux2, ' ') + 1;
+				}
+				
+				int tamanho_variavel = aux2 - data;
+				char aux3[10];
+				substring(aux3, data, 0, tamanho_variavel);
+
+				int valor = atoi(aux3) * TAMANHO_DO_TILE;
+				switch (flag)
+				{
+					case 0:
+						area->posicao.x = valor;
+						break;
+					case 1:
+						area->posicao.y = valor;
+						break;
+					case 2:
+						area->dimensao.vetor.x = valor;
+						break;
+					case 3:
+						area->dimensao.vetor.y = valor;
+						break;
+				}
+				flag++;
+			} while (aux != NULL);
+			adicionar_area(areas, area);
+		}
+	}
+	mapa->areas = areas;
+
+	al_fclose(areasContMapa);
+
 	al_destroy_bitmap(imagem_mapa);
+	free(image_local);
+	free(area_local);
+	free(buffer);
 	return mapa;
 }
 
 void desenhar_mapa(Mapa* mapa) {
 	ListaTile* tiles = mapa->tiles;
+	ListaArea* areas = mapa->areas;
 
 	while (tiles != NULL) {
 		Tile* tile = tiles->tile;
@@ -145,6 +246,14 @@ void desenhar_mapa(Mapa* mapa) {
 
 		desenhar_sprite(sprite, &tile->posicao);
 		tiles = tiles->next;
+	}
+
+	while (areas != NULL) {
+		AreaTransmicao* area = areas->area;
+		float x2 = area->dimensao.vetor.x + area->posicao.x;
+		float y2 = area->dimensao.vetor.y + area->posicao.y;
+		al_draw_filled_rectangle(area->posicao.x, area->posicao.y, x2, y2, al_map_rgba(127, 0, 0, 0));
+		areas = areas->next;
 	}
 }
 
@@ -165,8 +274,22 @@ Tile* colidiu_mapa(Mapa* mapa, Personagem* personagem) {
 	return NULL;
 }
 
+AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem){
+	ListaArea* areas = mapa->areas;
+
+	while (areas != NULL) {
+		AreaTransmicao* area = areas->area;
+
+		if (colidiu_tile(area, personagem)) return area;
+		areas = areas->next;
+	}
+
+	return NULL;
+}
+
 void liberar_mapa(Mapa* mapa) {
 	al_destroy_bitmap(tile_sheet);
 	liberar_tile(mapa->tiles);
+	liberar_area(mapa->areas);
 	free(mapa);
 }

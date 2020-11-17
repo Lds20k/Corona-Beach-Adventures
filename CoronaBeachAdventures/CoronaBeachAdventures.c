@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_acodec.h>
@@ -68,6 +69,12 @@ int main() {
 	// Inicia addon que da suporte as extensoes de audio
 	if (!al_init_acodec_addon()) {
 		printf("Falha ao inicializar o codec de audio.\n");
+		return 0;
+	}
+
+	// Inicia os dados primitivos do allegro
+	if (!al_init_primitives_addon()) {
+		printf("Falha ao inicializar os primitivos.\n");
 		return 0;
 	}
 
@@ -140,7 +147,7 @@ int main() {
 	al_set_audio_stream_playmode(musicaFundo.som, ALLEGRO_PLAYMODE_LOOP);
 
 	// Carrega mapa
-	Mapa* mapa = carregar_mapa("praia.bmp");
+	Mapa* mapa = carregar_mapa("praia");
 
 	// Carrega personagem
 	// Carregar um sprite
@@ -293,12 +300,14 @@ int main() {
 		//quando nao ha colisao
 		if (tile_colidido == NULL) {
 
-			// Mecanica de Pulo
-			//se a tecla cima for acionada
-			//e 
-			//a altura do pulo for menor que a altura maxima permitida
-			//e 
-			//nao estiver colidindo com nada
+			/*
+			Mecanica de Pulo
+			se a tecla cima for acionada
+			e 
+			a altura do pulo for menor que a altura maxima permitida
+			e 
+			nao estiver colidindo com nada
+			*/
 			if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
 				velocidadePersonagem.y -= DELTA_PULO;
 				alturaPulo += DELTA_PULO;
@@ -315,8 +324,10 @@ int main() {
 			}
 			//senao continua na mesma velocidade/velocidade maxima de y
 
-				// Movimentacao no eixo x
-			//enquando esta colidindo
+			/* 
+			Movimentacao no eixo x
+			enquando esta colidindo
+			*/
 			if ((teclas[DIREITA] || teclas[ESQUERDA])) {
 
 				//caso esteja no intervalo entre a maior e menor velocidade
@@ -330,67 +341,18 @@ int main() {
 			}
 		}
 		/*
-
-		// Verifica senão teve coisao
-		if (!colidiu_mapa(mapa, personagem)) {
-			//caso seja menor que o limite de velocidade 
-			if (velocidadePersonagem.y <= VELOCIDADE_MAX_Y) {
-				velocidadePersonagem.y -= velocidadeGravidade - (2.2 * teclas[BAIXO]);
-				velocidadeGravidade -= GRAVIDADE;
-			}
-			//senao continua na mesma velocidade/velocidade maxima de y
-		}
-
-		// Verifica se teve colisao
-		if (colidiu_mapa(mapa, personagem)) {
-			velocidadeGravidade = 0;
-			velocidadePersonagem.y = 0;
-			alturaPulo = 0;
-		}
-
-		// Mecanica de Pulo
-		//se a tecla cima for acionada
-		//e 
-		//a altura do pulo for menor que a altura maxima permitida
-		if (teclas[CIMA] && alturaPulo < ALTURA_MAX_PULO) {
-			velocidadePersonagem.y -= DELTA_PULO;
-			alturaPulo += DELTA_PULO;
-		}else{
-			//se a altura max do pulo for alcancada e necessario esperar ate colidir
-			teclas[CIMA] = false;
-		}
-
-		// Movimentacao no eixo x
-		//se alguma tecla de movimentacao do eixo x for pressionada
-		if ((teclas[DIREITA] || teclas[ESQUERDA])){
-
-			//caso esteja no intervalo entre a maior e menor velocidade
-			if ((velocidadePersonagem.x < VELOCIDADE_MAX_X) && (velocidadePersonagem.x > -VELOCIDADE_MAX_X)) {
-				velocidadePersonagem.x += 0.6 * teclas[DIREITA];
-				velocidadePersonagem.x -= 0.6 * teclas[ESQUERDA];
-			}
-			//caso ultrapasse os limites permanecer com o valor limite
-			//se permanecer com a tecla pressionada
-		} else {
-			//quando as teclas de alteracao do eixo x do vetor nao sao acionadas
-			//verificar se esta colidindo
-			//caso sim, o atrito faz com que o personagem perca velocidade
-			if (colidiu_mapa(mapa, personagem)) {
-				velocidadePersonagem.x *= 0.85;
-			}
-			//caso esteja no ar hipoteticamente nao há atrito
-			//ou seja, a velocidade de x permanece a mesma
-		}
-
-		
+		movimentacao personagem
+		baseada no vetor do personagem
 		*/
-		//movimentacao personagem
-		//baseada no vetor do personagem
 		personagem->posicao.y += velocidadePersonagem.y;
 		personagem->posicao.x += velocidadePersonagem.x;
 
 		if (personagem->posicao.y > 580) {
 			diminuir_vida(personagem, 100);
+		}
+
+		if (colidiu_area(mapa, personagem)) {
+			printf("na area\n");
 		}
 
 		// Verica se é necessario limpar a tela

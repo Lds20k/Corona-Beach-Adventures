@@ -181,6 +181,7 @@
     <ClCompile Include="personagem.c" />
     <ClCompile Include="sprites.c" />
     <ClCompile Include="sprites.h" />
+    <ClCompile Include="util.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="mapa.h" />
     <ClInclude Include="personagem.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="vetor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
