@@ -52,6 +52,8 @@ int main() {
 	bool rodando = true;
 	bool desenhar = true;
 	bool teclas[] = { false,false,false,false };
+	bool toggleMascara = false;
+	
 
 	float velocidadeGravidade = -1;
 	float alturaPulo = 0;
@@ -231,8 +233,10 @@ int main() {
 						vitoria = true;
 					break;
 				case ALLEGRO_KEY_Q:
-					if (mascara->vida > 0) {
+					if (mascara->vida > 0 && toggleMascara == false) {
 						mascara->usando = true;
+					}else{
+						mascara->usando = false;
 					}
 					break;
 				}
@@ -252,6 +256,13 @@ int main() {
 					break;
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = false;
+					break;
+				case ALLEGRO_KEY_Q:
+					if (toggleMascara == false) {
+						toggleMascara = true;
+					}else {
+						toggleMascara = false;
+					}
 					break;
 				}
 			}
