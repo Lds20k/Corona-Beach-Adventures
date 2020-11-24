@@ -51,6 +51,7 @@ static Sprite* terra = NULL;
 static Sprite* terra_direita = NULL;
 static Sprite* terra_esquerda = NULL;
 static Sprite* placa = NULL;
+static Sprite* item_mascara = NULL;
 
 // Cria um tile
 Tile* criar_tile(Sprite* sprite, const float x, const float y, const float largura, const float altura, const char* tipo);
@@ -78,6 +79,8 @@ Tile* colidiu_mapa(Mapa* mapa, Personagem* personagem);
 AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem);
 
 void liberar_mapa(Mapa* mapa);
+
+void excluir_mascara(ListaTile* tiles);
 
 void destruir_tile_sheet();
 
