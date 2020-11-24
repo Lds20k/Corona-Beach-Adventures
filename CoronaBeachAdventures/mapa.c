@@ -81,9 +81,10 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 	const ALLEGRO_COLOR COR_VERMELHO_ESCURO = al_map_rgb(127, 0, 0);
 	const ALLEGRO_COLOR COR_AZUL_CLARO = al_map_rgb(0, 148, 255);
 	const ALLEGRO_COLOR COR_PRETO = al_map_rgb(0, 0, 0);
+	const ALLEGRO_COLOR COR_VERDE_CLARO = al_map_rgb(0, 255, 0);
 
 	Sprite* sprite = NULL;
-	char* tipo = malloc(7 * sizeof(char));
+	char* tipo = malloc(8 * sizeof(char));
 
 	if (tile_sheet == NULL) tile_sheet = carregar_imagem("corona_beach.bmp");
 
@@ -91,6 +92,8 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 	if (terra_direita == NULL) terra_direita = criar_sprite(tile_sheet, 0, 0, 16, 16, 0);
 	if (terra_esquerda == NULL) terra_esquerda = criar_sprite(tile_sheet, 0, 0, 16, 16, ALLEGRO_FLIP_HORIZONTAL);
 	if (placa == NULL) placa = criar_sprite(tile_sheet, 0, 48, 16, 16, 0);
+	if (item_mascara == NULL) item_mascara = criar_sprite(tile_sheet, 16, 32, 16, 16, 0);
+
 
 	if (!memcmp(&cor, &COR_BRANCO, sizeof(ALLEGRO_COLOR))) return;
 
@@ -99,6 +102,11 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 		posicao_inicial.y = y * TAMANHO_DO_TILE;
 
 		return;
+	}
+
+	if (!memcmp(&cor, &COR_VERDE_CLARO, sizeof(ALLEGRO_COLOR))) {
+		sprite = item_mascara;
+		tipo = "mascara";
 	}
 
 	if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) { 
@@ -292,4 +300,20 @@ void liberar_mapa(Mapa* mapa) {
 	liberar_tile(mapa->tiles);
 	liberar_area(mapa->areas);
 	free(mapa);
+}
+
+void excluir_mascara(ListaTile* tiles) {
+	ListaArea* aux = tiles;
+	while (tiles->next->tile->sprite != item_mascara) {
+		if(tiles->next->tile->sprite == item_mascara){
+			free(tiles->next->tile);
+			tiles->next = NULL;
+			free(aux);
+			return;
+		}
+		else {
+			aux = tiles->next;
+			tiles = aux;
+		}
+	}
 }

@@ -53,6 +53,7 @@ int main() {
 	bool desenhar = true;
 	bool teclas[] = { false,false,false,false };
 	bool toggleMascara = false;
+	bool pegouMascara = false;
 	
 
 	float velocidadeGravidade = -1;
@@ -189,7 +190,7 @@ int main() {
 	velocidadePersonagem.x = 0;
 
 	//cria a mascara para uso do personagem
-	Mascara* mascara = carrega_mascara(100);  // mascara leve 100 - mascara media 500 - mascara pesada 1000
+	Mascara* mascara = carrega_mascara(100);  // mascara leve 100 - mascara media 200 - mascara pesada 300
 
 	Vetor2D aux = { 0, 0 };
 	bool vitoria = false;
@@ -272,8 +273,7 @@ int main() {
 				rodando = false;
 			}
 		}
-
-		printf("\n%u", mascara->vida);
+	
 		if (mascara->usando && frames % 30 == 0){
 			mascara->vida = usando_mascara(*mascara);
 		}
@@ -305,6 +305,13 @@ int main() {
 					velocidadePersonagem.y *= -REBOTE_Y;
 				}
 			}
+			printf("\n%u", mascara->vida);
+			if (pegouMascara == false && tile_colidido->tipo == "mascara") {
+				mascara->vida = 200;
+				pegouMascara = true;
+				excluir_mascara(mapa->tiles);
+			}
+			
 
 			float cantoEsqPlataforma = tile_colidido->posicao.x;
 			float cantoDirPlataforma = tile_colidido->posicao.x + tile_colidido->dimensao.vetor.x;
@@ -315,7 +322,7 @@ int main() {
 			// verifica se colidiu com o canto esquerdo com objeto em direcao a direita
 			// ha um rebote com perda de forca
 			if (velocidadePersonagem.x > 0 && cantoEsqPlataforma <= cantoDirPersonagem && cantoEsqPlataforma >= cantoDirPersonagem - (eixoPersonagem * 0.5)) {
-				printf("olha o rebote para esquerda");
+				//printf("olha o rebote para esquerda");
 				velocidadePersonagem.x = 0;
 			}
 			
@@ -348,7 +355,7 @@ int main() {
 				velocidadePersonagem.x *= 0.5;
 			}
 		}
-
+		
 		//quando nao ha colisao
 		if (tile_colidido == NULL) {
 
