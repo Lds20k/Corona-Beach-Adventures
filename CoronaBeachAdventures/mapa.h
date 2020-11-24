@@ -79,4 +79,6 @@ AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem);
 
 void liberar_mapa(Mapa* mapa);
 
+void destruir_tile_sheet();
+
 #endif

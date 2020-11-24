@@ -58,6 +58,8 @@ int main() {
 	float velocidadeGravidade = -1;
 	float alturaPulo = 0;
 	unsigned frames = 0;
+	unsigned nivel = 0;
+	char niveis[3][7] = {"nivel1", "nivel2", "nivel3"};
 
 	// Inicia o allegro
 	if (!al_init()) {
@@ -168,7 +170,7 @@ int main() {
 	al_set_audio_stream_playmode(musicaFundo.som, ALLEGRO_PLAYMODE_LOOP);
 
 	// Carrega mapa
-	Mapa* mapa = carregar_mapa("praia");
+	Mapa* mapa = carregar_mapa(niveis[nivel]);
 
 	// Carrega personagem
 	// Carregar um sprite
@@ -193,6 +195,7 @@ int main() {
 
 	Vetor2D aux = { 0, 0 };
 	bool vitoria = false;
+	bool proximo_level = false;
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -229,8 +232,15 @@ int main() {
 					diminuir_vida(personagem, 10);
 					break;
 				case ALLEGRO_KEY_ENTER:
-					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao))
-						vitoria = true;
+					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao)){
+						nivel++;
+
+						if (nivel < 2) {
+							proximo_level = true;
+						} else {
+							vitoria = true;
+						}
+					}
 					break;
 				case ALLEGRO_KEY_Q:
 					if (mascara->vida > 0 && toggleMascara == false) {
@@ -425,11 +435,20 @@ int main() {
 			al_flip_display();
 			desenhar = false;
 		}
+
+		if (proximo_level && !vitoria) {
+			liberar_mapa(mapa);
+			mapa = carregar_mapa(niveis[nivel]);
+			proximo_level = false;
+			personagem->posicao.x = posicao_inicial.x;
+			personagem->posicao.y = posicao_inicial.y;
+		}
 	}
 
 
 	// Limpa tudo
 	liberar_mapa(mapa);
+	destruir_tile_sheet();
 	al_destroy_bitmap(personagem->sprite->imagem);
 	al_destroy_audio_stream(musicaFundo.som);
 	al_destroy_event_queue(fila_eventos);

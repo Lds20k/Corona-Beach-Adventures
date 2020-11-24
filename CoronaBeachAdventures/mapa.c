@@ -79,13 +79,15 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 	const ALLEGRO_COLOR COR_BRANCO = al_map_rgb(255, 255, 255);
 	const ALLEGRO_COLOR COR_VERMELHO = al_map_rgb(255, 0, 0);
 	const ALLEGRO_COLOR COR_VERMELHO_ESCURO = al_map_rgb(127, 0, 0);
-	const ALLEGRO_COLOR COR_AZUL_CLARO = al_map_rgb(0, 148, 255);
+	const ALLEGRO_COLOR COR_AZUL_CLARO = al_map_rgb(0, 255, 255);
 	const ALLEGRO_COLOR COR_PRETO = al_map_rgb(0, 0, 0);
 
 	Sprite* sprite = NULL;
+	bool eh_finalizador = false;
 	char* tipo = malloc(7 * sizeof(char));
 
-	if (tile_sheet == NULL) tile_sheet = carregar_imagem("corona_beach.bmp");
+	if (tile_sheet == NULL) 
+		tile_sheet = carregar_imagem("corona_beach.bmp");
 
 	if (terra == NULL) terra = criar_sprite(tile_sheet, 16, 0, 16, 16, 0);
 	if (terra_direita == NULL) terra_direita = criar_sprite(tile_sheet, 0, 0, 16, 16, 0);
@@ -104,6 +106,7 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 	if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) { 
 		sprite = placa;
 		tipo = "objeto";
+		eh_finalizador = true;
 	}
 
 	if (!memcmp(&cor, &COR_VERMELHO, sizeof(ALLEGRO_COLOR))) { 
@@ -127,7 +130,7 @@ void definir_tile(ListaTile* tiles, ALLEGRO_BITMAP* imagem_mapa, const float x, 
 	Tile* tile_criado = criar_tile(sprite, x * TAMANHO_DO_TILE, y * TAMANHO_DO_TILE, TAMANHO_DO_TILE, TAMANHO_DO_TILE, tipo);
 	adicionar_tile(tiles, tile_criado);
 
-	//if (!memcmp(&cor, &COR_PRETO, sizeof(ALLEGRO_COLOR))) finalizador = tile_criado;
+	if (eh_finalizador) finalizador = tile_criado;
 	printf("%f %f\t| %f %f %f\n", x, y, cor.r, cor.g, cor.b);
 }
 
@@ -189,6 +192,8 @@ Mapa* carregar_mapa(const char* local) {
 			char* aux = NULL;
 			int flag = 0;
 			AreaTransmicao* area = malloc(sizeof(AreaTransmicao));
+			if (area == NULL) return NULL;
+
 			do {
 				char* data = (aux == NULL) ? strchr(pbuffer, ' ') + 1 : aux;
 
@@ -248,7 +253,7 @@ void desenhar_mapa(Mapa* mapa) {
 		tiles = tiles->next;
 	}
 
-	while (areas != NULL) {
+	while (areas != NULL && areas->area != NULL) {
 		AreaTransmicao* area = areas->area;
 		float x2 = area->dimensao.vetor.x + area->posicao.x;
 		float y2 = area->dimensao.vetor.y + area->posicao.y;
@@ -277,7 +282,7 @@ Tile* colidiu_mapa(Mapa* mapa, Personagem* personagem) {
 AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem){
 	ListaArea* areas = mapa->areas;
 
-	while (areas != NULL) {
+	while (areas != NULL && areas->area != NULL) {
 		AreaTransmicao* area = areas->area;
 
 		if (colidiu_tile(area, personagem)) return area;
@@ -288,8 +293,12 @@ AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem){
 }
 
 void liberar_mapa(Mapa* mapa) {
-	al_destroy_bitmap(tile_sheet);
 	liberar_tile(mapa->tiles);
 	liberar_area(mapa->areas);
 	free(mapa);
+}
+
+void destruir_tile_sheet() {
+	al_destroy_bitmap(tile_sheet);
+	tile_sheet = NULL;
 }
