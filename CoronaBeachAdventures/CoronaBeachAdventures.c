@@ -177,12 +177,15 @@ int main() {
 	ALLEGRO_BITMAP* gameover = carregar_imagem("gameover.bmp");
 	ALLEGRO_BITMAP* vitoria_img = carregar_imagem("vitoria.bmp");
 	ALLEGRO_BITMAP* vida = carregar_imagem("corona_beach.bmp");
+	ALLEGRO_BITMAP* mascarahud = carregar_imagem("corona_beach.bmp");
 
 	Sprite* gameover_sprite = criar_sprite(gameover, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* vitoria_sprite = criar_sprite(vitoria_img, 0, 0, JANELA_LARGURA, JANELA_ALTURA, 0);
 	Sprite* botoes = criar_sprite(bmp_botoes, 0, 0, 16, 16, 0);
 	Personagem* personagem = carrega_personagem(botoes, posicao_inicial.x, posicao_inicial.y, 16, 16);
 	Sprite* vida_sprite = criar_sprite(vida, 0, 32, 16, 16, 0);
+	Sprite* mascara_sprite = criar_sprite(mascarahud, 16, 32, 16, 16, 0);
+
 	
 	//cria um vetor que guarda a velocidade do personagem
 	Vetor2D velocidadePersonagem;
@@ -193,6 +196,7 @@ int main() {
 	Mascara* mascara = carrega_mascara(100);  // mascara leve 100 - mascara media 200 - mascara pesada 300
 
 	Vetor2D aux = { 0, 0 };
+	Vetor2D aux2 = { 50, 0 };
 	bool vitoria = false;
 
 	// Loop principal do jogo
@@ -384,7 +388,7 @@ int main() {
 			//senao continua na mesma velocidade/velocidade maxima de y
 
 			/* 
-			Movimentacao no eixo x
+			//Movimentacao no eixo x
 			enquando esta colidindo
 			*/
 			if ((teclas[DIREITA] || teclas[ESQUERDA])) {
@@ -424,6 +428,8 @@ int main() {
 					desenhar_personagem(personagem);
 					desenhar_sprite(vida_sprite, &aux);
 					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
+					desenhar_sprite(mascara_sprite, &aux2);
+					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 70, 0, 0, "%d %s", mascara->vida, (mascara->usando)?"usando":"");
 				}
 			}
 			
