@@ -305,3 +305,27 @@ void liberar_mapa(Mapa* mapa) {
 	liberar_area(mapa->areas);
 	free(mapa);
 }
+
+void destruir_tile_sheet() {
+	al_destroy_bitmap(tile_sheet);
+}
+
+
+void remover_tile(Mapa* mapa, Tile* tile_deletar) {
+	ListaTile* aux = mapa->tiles;
+	ListaTile* ant = NULL;
+	
+	if (aux->tile == tile_deletar) {
+		mapa->tiles = aux->next;
+	} else {
+		while (aux->tile != tile_deletar) {
+			ant = aux;
+			aux = aux->next;
+		}
+
+		ant->next = aux->next;
+	}
+
+	free(aux->tile);
+	free(aux);
+}

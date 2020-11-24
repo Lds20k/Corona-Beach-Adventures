@@ -80,8 +80,8 @@ AreaTransmicao* colidiu_area(Mapa* mapa, Personagem* personagem);
 
 void liberar_mapa(Mapa* mapa);
 
-void excluir_mascara(ListaTile* tiles);
-
 void destruir_tile_sheet();
+
+void remover_tile(ListaTile* tiles, Tile* tile_deletar);
 
 #endif

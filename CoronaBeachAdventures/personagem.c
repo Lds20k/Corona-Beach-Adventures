@@ -28,6 +28,5 @@ void diminuir_vida(Personagem* personagem, unsigned dano) {
 	}
 
 	personagem->vida = personagem->vida - dano;
-	printf("vida: %d\n", personagem->vida);
 }
 

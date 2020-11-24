@@ -33,7 +33,7 @@
 #define JANELA_LARGURA 640
 #define JANELA_ALTURA 480
 
-#define COR_PRETA al_map_rgb(0, 0, 0)
+#define COR_FUNDO al_map_rgb(188, 198, 255)
 
 #define GRAVIDADE 0.085
 #define VELOCIDADE_MAX_X 6
@@ -151,7 +151,7 @@ int main() {
 
 
 	// Desenha uma tela preta
-	al_clear_to_color(COR_PRETA);
+	al_clear_to_color(COR_FUNDO);
 	al_flip_display();
 
 	// Inicia o timer
@@ -240,7 +240,7 @@ int main() {
 					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao)){
 						nivel++;
 
-						if (nivel < 2) {
+						if (nivel < 3) {
 							proximo_level = true;
 						} else {
 							vitoria = true;
@@ -319,11 +319,11 @@ int main() {
 					velocidadePersonagem.y *= -REBOTE_Y;
 				}
 			}
-			printf("\n%u", mascara->vida);
+
 			if (pegouMascara == false && tile_colidido->tipo == "mascara") {
 				mascara->vida = 200;
 				pegouMascara = true;
-				excluir_mascara(mapa->tiles);
+				remover_tile(mapa, tile_colidido);
 			}
 			
 
@@ -426,7 +426,7 @@ int main() {
 
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
-			al_clear_to_color(COR_PRETA);
+			al_clear_to_color(COR_FUNDO);
 			
 			if (personagem->morto) {
 				desenhar_sprite(gameover_sprite, &aux);
