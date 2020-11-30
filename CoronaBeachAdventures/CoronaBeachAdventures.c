@@ -201,6 +201,8 @@ int main() {
 	Vetor2D aux2 = { 50, 0 };
 	bool vitoria = false;
 	bool proximo_level = false;
+	char *texto = "use mascara";
+	Vetor2D posicao_texto = { 500, 10 };
 
 	// Loop principal do jogo
 	while (rodando) {
@@ -224,18 +226,23 @@ int main() {
 				case ALLEGRO_KEY_LEFT:
 					teclas[ESQUERDA] = true;
 					break;
+
 				case ALLEGRO_KEY_RIGHT:
 					teclas[DIREITA] = true;
 					break;
+
 				case ALLEGRO_KEY_UP:
 					teclas[CIMA] = true;
 					break;
+
 				case ALLEGRO_KEY_DOWN:
 					teclas[BAIXO] = true;
 					break;
+
 				case ALLEGRO_KEY_BACKSPACE:
 					diminuir_vida(personagem, 10);
 					break;
+
 				case ALLEGRO_KEY_ENTER:
 					if (verificar_colisao(&finalizador->dimensao, &finalizador->posicao, &personagem->dimensao, &personagem->posicao)){
 						nivel++;
@@ -247,6 +254,7 @@ int main() {
 						}
 					}
 					break;
+
 				case ALLEGRO_KEY_Q:
 					if (mascara->vida > 0 && toggleMascara == false) {
 						mascara->usando = true;
@@ -254,6 +262,17 @@ int main() {
 						mascara->usando = false;
 					}
 					break;
+
+				case ALLEGRO_KEY_R:
+					if (personagem->morto == true && vitoria == false) {
+						personagem->morto = false;
+						personagem->posicao.x = posicao_inicial.x;
+						personagem->posicao.y = posicao_inicial.y;
+						personagem->vida = 100;
+						mascara->usando = false;
+						toggleMascara = false;
+					}
+				break;
 				}
 			}
 
@@ -424,6 +443,9 @@ int main() {
 			diminuir_vida(personagem, 100);
 		}
 
+		if (personagem->morto)
+			mascara->usando = false;
+
 		// Verica se é necessario limpar a tela
 		if (desenhar && al_is_event_queue_empty(fila_eventos)) {
 			al_clear_to_color(COR_FUNDO);
@@ -440,10 +462,9 @@ int main() {
 					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
 					desenhar_sprite(mascara_sprite, &aux2);
 					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 70, 0, 0, "%d %s", mascara->vida, (mascara->usando)?"usando":"");
+					al_draw_textf(fonte, al_map_rgb(0, 0, 0), posicao_texto.x, posicao_texto.y, 0, "%s", texto);
 				}
 			}
-			
-			//printf("%d\n", frames);
 
 			al_flip_display();
 			desenhar = false;
@@ -455,6 +476,11 @@ int main() {
 			proximo_level = false;
 			personagem->posicao.x = posicao_inicial.x;
 			personagem->posicao.y = posicao_inicial.y;
+			if (nivel == 1)
+				texto = "evite aglomeracao";
+
+			if (nivel == 2)
+				texto = "fique em casa";
 		}
 	}
 
@@ -465,6 +491,7 @@ int main() {
 	al_destroy_bitmap(personagem->sprite->imagem);
 	al_destroy_audio_stream(musicaFundo.som);
 	al_destroy_event_queue(fila_eventos);
+	al_destroy_font(fonte);
 	al_destroy_display(janela);
 	return 0;
 }

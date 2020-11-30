@@ -82,6 +82,6 @@ void liberar_mapa(Mapa* mapa);
 
 void destruir_tile_sheet();
 
-void remover_tile(ListaTile* tiles, Tile* tile_deletar);
+void remover_tile(Mapa* tiles, Tile* tile_deletar);
 
 #endif
