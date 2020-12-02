@@ -462,9 +462,9 @@ int main() {
 					desenhar_mapa(mapa);
 					desenhar_personagem(personagem);
 					desenhar_sprite(vida_sprite, &aux);
-					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
+					al_draw_textf(fonte, al_map_rgb(0, 0, 0), 18, 0, 0, "%d", (personagem->vida - 100) * -1);
 					desenhar_sprite(mascara_sprite, &aux2);
-					al_draw_textf(fonte, al_map_rgb(255, 255, 255), 70, 0, 0, "%d %s", mascara->vida, (mascara->usando)?"usando":"");
+					al_draw_textf(fonte, al_map_rgb(0, 0, 0), 70, 0, 0, "%d %s", mascara->vida, (mascara->usando)?"usando":"");
 					al_draw_textf(fonte, al_map_rgb(0, 0, 0), posicao_texto.x, posicao_texto.y, 0, "%s", texto);
 				}
 			}
