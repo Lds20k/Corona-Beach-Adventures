@@ -165,7 +165,7 @@ int main() {
 
 	// Carrega uma audio
 	Musica musicaFundo;
-	musicaFundo = carregar_audio("soundtrack.ogg");
+	musicaFundo = carregar_audio("musica.ogg");
 
 	// Define que o stream vai tocar no modo repeat
 	al_set_audio_stream_playmode(musicaFundo.som, ALLEGRO_PLAYMODE_LOOP);
@@ -211,6 +211,9 @@ int main() {
 
 		// Busca o evento (se houver)
 		al_wait_for_event(fila_eventos, &evento);
+
+		// coloca a musica de fundo na lista
+		al_attach_audio_stream_to_mixer(musicaFundo.som, al_get_default_mixer());
 
 		if (evento.type) {
 
