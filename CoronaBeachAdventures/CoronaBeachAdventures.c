@@ -343,7 +343,7 @@ int main() {
 			}
 
 			if (pegouMascara == false && tile_colidido->tipo == "mascara") {
-				mascara->vida = 200;
+				mascara->vida += 50;
 				pegouMascara = true;
 				remover_tile(mapa, tile_colidido);
 			}
